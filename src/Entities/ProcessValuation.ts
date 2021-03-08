@@ -28,5 +28,21 @@ export default class ProcessValuation{
     public EquipmentName?: string;
 
     public MortgageAssetLevel2?: number;
+
+    public Advantage?: string;
+
+    public DisAdvantage?: string;
+
+    public WorkfieldOtherInfomation?: string;
+
+    public Version?: number;
+
+    public CoordinateLat?: string;
+
+    public CoordinateLon?: string;
+
+    public Coordinate?: string;
+
+
     
 }

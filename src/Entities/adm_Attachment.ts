@@ -79,5 +79,10 @@ class adm_Attachment {
 
     public DocumentTypeName?: string;
     
+    public ProcessValuationREConstructionID?: number;
+
+    public FileContent?: any;
+    
+    
 }
 export default adm_Attachment;

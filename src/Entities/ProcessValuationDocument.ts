@@ -8,6 +8,7 @@ export default class ProcessValuationDocument{
     public MortgageAssetCode?: string;
     public MortgageAssetCode1?: number;
     public MortgageAssetCode2?: number;
+    public MortgageAssetCode2Code?: string;
     public CustomerID?: number;
     public CustomerName?: string;
     public ValuationOrganizationID?: number;
@@ -40,4 +41,6 @@ export default class ProcessValuationDocument{
     public MortgageAssetCode1Name?: string;
     //
     public SLAPlanEnd?: string;
+    public Version?: number;
+    public MortgagedDescription?: string;
 }

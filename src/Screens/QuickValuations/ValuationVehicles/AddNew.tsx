@@ -34,6 +34,7 @@ import { TextInputMask } from "react-native-masked-text";
 import { ClientMessage } from "../../../SharedEntity/SMXException";
 import { LinearGradient } from "expo-linear-gradient";
 import QuickValuationVehicle from "../../../Entities/QuickValuationVehicle";
+import Utility from "../../../Utils/Utility";
 
 const { width, height } = Dimensions.get("window");
 
@@ -53,7 +54,9 @@ interface iState {
     TotalPrice?: string;
     txtOTP?: string;
     QuickValuationVehicle?: QuickValuationVehicle;
-
+    VerifyOTP: boolean;
+    ShowResult: boolean;
+    ShowCalculate: boolean;
 }
 
 @inject(SMX.StoreName.GlobalStore)
@@ -69,6 +72,9 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
             TotalPrice: '',
             txtOTP: '',
             QuickValuationVehicle: new QuickValuationVehicle(),
+            VerifyOTP: false,
+            ShowResult: false,
+            ShowCalculate: true
         };
     }
     async componentDidMount() {
@@ -76,21 +82,26 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
     }
 
     async SetUpForm() {
-        this.props.GlobalStore.ShowLoading();
-        let res = await HttpUtils.post<QuickValuationDto>(
-            ApiUrl.QuickValuation_Execute,
-            SMX.ApiActionCode.SetupViewVehicleForm,
-            JSON.stringify(new QuickValuationDto())
-        );
+        try {
+            this.props.GlobalStore.ShowLoading();
+            let res = await HttpUtils.post<QuickValuationDto>(
+                ApiUrl.QuickValuation_Execute,
+                SMX.ApiActionCode.SetupViewVehicleForm,
+                JSON.stringify(new QuickValuationDto())
+            );
 
-        if (res) {
-            this.setState({
-                LstCarType: res!.LstCarType!,
-                LstBrand: res!.LstBrand!
-            });
+            if (res) {
+                this.setState({
+                    LstCarType: res!.LstCarType!,
+                    LstBrand: res!.LstBrand!
+                });
+            }
+
+            this.props.GlobalStore.HideLoading();
+        } catch (ex) {
+            this.props.GlobalStore.HideLoading();
+            this.props.GlobalStore.Exception = ex;
         }
-
-        this.props.GlobalStore.HideLoading();
 
     }
 
@@ -124,16 +135,19 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
                 this.props.GlobalStore.HideLoading();
                 let message = "[Loại xe] Không được để trống";
                 this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
             }
             if (this.state.SelectedBrand == undefined) {
                 this.props.GlobalStore.HideLoading();
                 let message = "[Hãng sản xuất] Không được để trống";
                 this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
             }
             if (this.state.SelectedModel == undefined) {
                 this.props.GlobalStore.HideLoading();
                 let message = "[Số loại/Model] Không được để trống";
                 this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
             }
             if (!this.state.ProducedYear || this.state.ProducedYear == '') {
                 this.props.GlobalStore.HideLoading();
@@ -156,7 +170,11 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
             );
 
             if (res) {
-                //this.setState({ Employee: res!.Employee! });
+                this.setState({
+                    ShowCalculate: false,
+                    VerifyOTP: res!.VerifyOTP!,
+                    QuickValuationVehicle: res!.QuickValuationVehicle!
+                });
             }
 
             this.props.GlobalStore.HideLoading();
@@ -173,6 +191,7 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
             let req = new QuickValuationDto();
             req.ActionCode = SMX.ActionCode.Verify_OTP;
             req.OtpCode = this.state.txtOTP;
+            req.QuickValuationVehicle = this.state.QuickValuationVehicle;
 
             let res = await HttpUtils.post<QuickValuationDto>(
                 ApiUrl.QuickValuation_Execute,
@@ -180,6 +199,14 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
                 JSON.stringify(req)
             );
 
+            if (res) {
+                this.setState({
+                    ShowCalculate: false,
+                    VerifyOTP: false,
+                    ShowResult: res!.ShowResult!,
+                    QuickValuationVehicle: res!.QuickValuationVehicle!
+                });
+            }
 
             this.props.GlobalStore.HideLoading();
         } catch (ex) {
@@ -193,7 +220,7 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
             <View style={{ height: height, backgroundColor: "#FFF" }}>
                 <Toolbar Title="Tính giá nhanh PTGT Đường bộ" navigation={this.props.navigation} HasDrawer={true} />
                 <KeyboardAvoidingView behavior="height" style={{ flex: 1, padding: 10 }}>
-                    <ScrollView>
+                    <ScrollView showsVerticalScrollIndicator={false}>
                         <View>
                             <View style={[styles.Item, { marginBottom: 10 }]}>
                                 <Text style={{ fontWeight: '600', fontSize: 18 }}>
@@ -280,7 +307,7 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
                                 </View>
                             </View>
                             {
-                                this.state.TotalPrice ? (
+                                this.state.ShowResult == true ? (
                                     <View>
                                         <View style={[styles.Item, { marginTop: 20 }]}>
                                             <Text style={{ fontWeight: '600', fontSize: 18 }}>
@@ -294,7 +321,7 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
                                             <View style={{ flex: 3, borderWidth: 1, borderColor: "#acacac", borderRadius: 5 }}>
                                                 <TextInput
                                                     style={{ color: "#1B2031", marginHorizontal: 7, marginVertical: 10 }}
-                                                    value={this.state.TotalPrice}
+                                                    value={Utility.GetDecimalString(this.state.QuickValuationVehicle.TotalPrice)}
                                                 />
                                             </View>
                                         </View>
@@ -303,7 +330,7 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
                             }
 
                             {
-                                !this.state.TotalPrice ? (
+                                this.state.ShowCalculate == true ? (
                                     <TouchableOpacity
                                         style={{ justifyContent: 'center', alignItems: 'center' }}
                                         onPress={() => {
@@ -329,7 +356,7 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
                                 ) : undefined
                             }
                             {
-                                this.state.TotalPrice ? (
+                                this.state.VerifyOTP == true ? (
                                     <View>
                                         <View style={[styles.Item, { marginBottom: 10 }]}>
                                             <Text style={{ fontWeight: '600', fontSize: 18 }}>
@@ -352,7 +379,7 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
                                                         suffixUnit: "",
                                                     }}
                                                     value={this.state.txtOTP}
-                                                    style={[Theme.TextInput]}
+                                                    style={[Theme.TextInput, { borderColor: "red", }]}
                                                     onChangeText={(val) => {
                                                         this.setState({ txtOTP: val });
                                                     }}

@@ -1,4 +1,5 @@
 import { observable, action, runInAction, computed, IObservableValue } from "mobx";
+import { ProcessValuationDocumentFilter } from "../DtoParams/ProcessValuationDocumentDto";
 import { SMXException } from "../SharedEntity/SMXException";
 
 export default class GlobalStore {
@@ -7,6 +8,14 @@ export default class GlobalStore {
     @observable IsLoading?: boolean;
 
     @observable UpdatedStatusTrigger?: any;
+
+    @observable DSFilterValue?: ProcessValuationDocumentFilter;
+
+    @observable DanhSachTSKhaoSatFilterTrigger?: any;
+
+    @observable ApprovingValuationFilterTrigger?: any;
+
+    @observable HoSoDangDinhGiaFilterTrigger?: any;
 
     @observable UpdatedStatusTriggerDSAll?: any;
 

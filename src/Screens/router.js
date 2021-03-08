@@ -26,12 +26,23 @@ import Error from "./shared/Error";
 
 //new
 import DanhsachTSKhaoSatSrc from "../Screens/DanhSachTSKhaoSat/Default";
+import HoSoFilter from "../Screens/DanhSachTSKhaoSat/HoSoFilter";
 import DanhsachBCDGChoDuyetSrc from "../Screens/ApprovingValuation/Default";
+import BCDGChoDuyetSrc from "../Screens/ApprovingValuation/Display";
+import PDFView from "../Screens/ApprovingValuation/PDFView";
 import DSHoSoDangDinhGiaSrc from "../Screens/HoSoDangDinhGia/Default";
 import ValuationREsSrc from "../Screens/QuickValuations/ValuationREs/AddNew";
 import ValuationCondominiumsSrc from "../Screens/QuickValuations/ValuationCondominiums/AddNew";
 import ValuationVehiclesSrc from "../Screens/QuickValuations/ValuationVehicles/AddNew";
 import KhaoSatHienTrangScr from "../Screens/DanhSachTSKhaoSat/Edit";
+
+//Actions
+import EquipmentsSrc from "../Screens/Actions/Equipments/Edit";
+import EquipmentImagesSrc from "../Screens/Actions/Equipments/Images";
+
+import BatchEquipmentsSrc from "../Screens/Actions/BatchEquipments/Edit";
+import BatchEquipmentsImagesSrc from "../Screens/Actions/BatchEquipments/Images";
+
 
 import ProfilesSrc from "../Screens/Profile/Display";
 
@@ -80,6 +91,90 @@ function HomeContainer() {
     );
 }
 
+const withNavStackPDFView = (Component) => (
+    <Component
+        {...this.props}
+        name="PDFView"
+        component={PDFView}
+        options={({ navigation, route }) => ({
+            ...defaultTitleStyle,
+            headerShown: false,
+        })}
+    />
+);
+
+const withNavStackFilter = (Component) => (
+    <Component
+        {...this.props}
+        name="HoSoFilter"
+        component={HoSoFilter}
+        options={({ navigation, route }) => ({
+            ...defaultTitleStyle,
+            headerShown: false,
+        })}
+    />
+);
+
+const withNavStackKhaoSatHienTrang = (Component) => (
+    <Component
+        {...this.props}
+        name="KhaoSatHienTrangSrc"
+        component={KhaoSatHienTrangScr}
+        options={({ navigation, route }) => ({
+            ...defaultTitleStyle,
+            headerShown: false,
+        })}
+    />
+);
+
+const withNavStackEquipments = (Component) => (
+    <Component
+        {...this.props}
+        name="EquipmentsSrc"
+        component={EquipmentsSrc}
+        options={({ navigation, route }) => ({
+            ...defaultTitleStyle,
+            headerShown: false,
+        })}
+    />
+);
+
+const withNavStackEquipmentImages = (Component) => (
+    <Component
+        {...this.props}
+        name="EquipmentImagesSrc"
+        component={EquipmentImagesSrc}
+        options={({ navigation, route }) => ({
+            ...defaultTitleStyle,
+            headerShown: false,
+        })}
+    />
+);
+
+const withNavStackBatchEquipments = (Component) => (
+    <Component
+        {...this.props}
+        name="BatchEquipmentsSrc"
+        component={BatchEquipmentsSrc}
+        options={({ navigation, route }) => ({
+            ...defaultTitleStyle,
+            headerShown: false,
+        })}
+    />
+);
+
+const withNavStackBatchEquipmentsImages = (Component) => (
+    <Component
+        {...this.props}
+        name="BatchEquipmentsImagesSrc"
+        component={BatchEquipmentsImagesSrc}
+        options={({ navigation, route }) => ({
+            ...defaultTitleStyle,
+            headerShown: false,
+        })}
+    />
+);
+
 const DanhSachTSKhaoSatStack = createStackNavigator();
 function DanhSachTSKhaoSatContainer() {
     return (
@@ -92,14 +187,15 @@ function DanhSachTSKhaoSatContainer() {
                     headerShown: false,
                 })}
             />
-            <DanhSachTSKhaoSatStack.Screen
-                name="KhaoSatHienTrangScr"
-                component={KhaoSatHienTrangScr}
-                options={({ navigation, route }) => ({
-                    ...defaultTitleStyle,
-                    headerShown: false,
-                })}
-            />
+            {withNavStackKhaoSatHienTrang(DanhSachTSKhaoSatStack.Screen)}
+
+            {withNavStackEquipments(DanhSachTSKhaoSatStack.Screen)}
+            {withNavStackEquipmentImages(DanhSachTSKhaoSatStack.Screen)}
+
+            {withNavStackBatchEquipments(DanhSachTSKhaoSatStack.Screen)}
+            {withNavStackBatchEquipmentsImages(DanhSachTSKhaoSatStack.Screen)}
+
+            {withNavStackFilter(DanhSachTSKhaoSatStack.Screen)}
         </DanhSachTSKhaoSatStack.Navigator>
     );
 }
@@ -116,6 +212,16 @@ function DanhsachBCDGChoDuyetContainer() {
                     headerShown: false,
                 })}
             />
+            <DanhsachBCDGChoDuyetStack.Screen
+                name="BCDGChoDuyet"
+                component={BCDGChoDuyetSrc}
+                options={({ navigation, route }) => ({
+                    ...defaultTitleStyle,
+                    headerShown: false,
+                })}
+            />
+            {withNavStackFilter(DanhSachTSKhaoSatStack.Screen)}
+            {withNavStackPDFView(DanhSachTSKhaoSatStack.Screen)}
         </DanhsachBCDGChoDuyetStack.Navigator>
     );
 }
@@ -132,6 +238,7 @@ function DSHoSoDangDinhGiaContainer() {
                     headerShown: false,
                 })}
             />
+            {withNavStackFilter(DanhSachTSKhaoSatStack.Screen)}
         </DSHoSoDangDinhGiaStack.Navigator>
     );
 }
@@ -148,7 +255,7 @@ function ValuationREsContainer() {
                     headerShown: false,
                 })}
             />
-            
+
         </ValuationREsStack.Navigator>
     );
 }
@@ -369,7 +476,7 @@ function DrawerContainer() {
                     headerShown: false,
                 }}
             />
-            
+
             <Drawer.Screen
                 name="ValuationVehicles"
                 component={ValuationVehiclesContainer}

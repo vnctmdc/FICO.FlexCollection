@@ -183,7 +183,65 @@ enum ValidateDocumentStatus {
     DeNghiBoSungHoSo = 3,
 }
 
+enum MortgageAssetCode2 {
+    // BDS
+    BatDongSan_DatO = "BatDongSan_DatO",
+    BatDongSan_CaoOc = "BatDongSan_CaoOc",
+    BatDongSan_ChungCu = "BatDongSan_ChungCu",
+    BatDongSan_DuAn = "BatDongSan_DuAn",
+    BatDongSan_NhaXuong = "BatDongSan_NhaXuong",
+    BatDongSan_NhieuHoNhieuTang = "BatDongSan_NhieuHoNhieuTang",
+    BatDongSan_HopThua = "BatDongSan_HopThua", // khong co trong SP, chi tao de redirect folder
+
+    // PTVT
+    PTVT_DuongBo = "PTVT_DuongBo",
+    PTVT_DuongThuy = "PTVT_DuongThuy",
+    PTVT_LoDuongBo = "PTVT_LoDuongBo",
+
+    // MMTB
+    MMTB_MMTB = "MMTB_MMTB",
+    MMTB_DayChuyen = "MMTB_DayChuyen",
+
+    // TaiSanTuongDuongTien
+    TaiSanTuongDuongTien_SoTietKiem = "TaiSanTuongDuongTien_SoTietKiem",
+
+    //So tiet kiem
+    GTCG_TTK_STK_HÐTG_CCTG_KyPhieu_HDVKhacCuaTCTD = "GTCG_TTK_STK_HÐTG_CCTG_KyPhieu_HDVKhacCuaTCTD",
+
+    // GTCG
+    GTCG_ChungKhoan = "GTCG_ChungKhoan",
+
+    // HangHoa
+    HangHoa_HangHoa = "HangHoa_HangHoa",
+
+    // QuyenDoiNo
+    QuyenDoiNo_QuyenDoiNo = "QuyenDoiNo_QuyenDoiNo",
+
+    // KimKhiDaQuy
+    KimKhiDaQuy_KimKhiDaQuy = "KimKhiDaQuy_KimKhiDaQuy",
+
+    // BaoLanhThanhToan
+    BaoLanhThanhToan_BaoLanhThanhToan = "BaoLanhThanhToan_BaoLanhThanhToan",
+
+    // KhoGia
+    KhoGia = "KhoGia",
+}
+
+enum FeatureId {
+    ApprovingValuation = 131001,
+    DanhSachTSKhaoSat = 131002,
+    HoSoDangDinhGia = 131003,
+}
+
+enum ProcessValuationREFrontageType {
+    MatDuongPho = 0,
+    MatNgoHem = 1,
+    MatDuongNoiBo = 2
+}
+
 export {
+    FeatureId,
+    MortgageAssetCode2,
     ValidateDocumentStatus,
     ProcessValuationDocument,
     ProcessValuationDocumentContactType,
@@ -209,4 +267,5 @@ export {
     AttachmentRefType,
     KyHuaTra,
     PromisePaid,
+    ProcessValuationREFrontageType
 };

@@ -34,6 +34,8 @@ import { LinearGradient } from "expo-linear-gradient";
 import DropDownBox from "../../../components/DropDownBox";
 import { TextInputMask } from "react-native-masked-text";
 import { ClientMessage } from "../../../SharedEntity/SMXException";
+import QuickValuationRE from "../../../Entities/QuickValuationRE";
+import Utility from "../../../Utils/Utility";
 
 const { width, height } = Dimensions.get("window");
 
@@ -86,6 +88,10 @@ interface iState {
     BankUnitPrice?: string;
     TotalPrice?: string;
     txtOTP?: string;
+    QuickValuationRE?: QuickValuationRE;
+    VerifyOTP: boolean;
+    ShowResult: boolean;
+    ShowCalculate: boolean;
 }
 
 @inject(SMX.StoreName.GlobalStore)
@@ -130,7 +136,11 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
 
             BankUnitPrice: '',
             TotalPrice: '',
-            txtOTP: ''
+            txtOTP: '',
+            QuickValuationRE: new QuickValuationRE(),
+            VerifyOTP: false,
+            ShowResult: false,
+            ShowCalculate: true,
 
         };
     }
@@ -218,16 +228,105 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
         try {
             this.props.GlobalStore.ShowLoading();
             let req = new QuickValuationDto();
+            let item = new QuickValuationRE();
             req.ActionCode = SMX.ActionCode.Calculate_Price;
+
+            if (this.state.ProvinceID == undefined) {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Tỉnh/Thành phố] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            if (this.state.DistrictID == undefined) {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Quận/Huyện] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            if (this.state.StreetID == undefined) {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Tên tuyến đường VT1 (mặt đường/phố) theo bảng giá TPBank] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            if (this.state.SegmentID == undefined) {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Đoạn đường] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            if (!this.state.LandArea || this.state.LandArea == '') {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Diện tích đất ở(m2)] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            if (!this.state.LandWidthMin || this.state.LandWidthMin == '') {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Độ rộng ngõ nhỏ nhất (trường hợp VT1 xác định = 0) (m)] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            if (!this.state.BuiltYear || this.state.BuiltYear == '') {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Năm xây dựng] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            var landArea = this.state.LandArea;
+            var gardenArea = this.state.GardenArea;
+            var planningArea = this.state.PlanningArea;
+            var landWidthMin = this.state.LandWidthMin;
+            var landWidthNearest = this.state.LandWidthNearest;
+            var frontageWidth = this.state.FrontageWidth;
+            var distanceToMainStreet = this.state.DistanceToMainStreet;
+            var constructionInLegalArea = this.state.ConstructionInLegalArea;
+            var constructionOutLegalArea = this.state.ConstructionOutLegalArea;
+            var builtYear = this.state.BuiltYear;
+
+            item.Province = this.state.ProvinceID;
+            item.District = this.state.DistrictID;
+            item.Town = this.state.TownID;
+            item.Street = this.state.StreetID;
+            item.HouseNumber = this.state.HouseNumber;
+            item.Segment = this.state.SegmentID;
+
+            item.LandArea = landArea && landArea.length != 0 ? parseInt(landArea.split(",").join("")) : undefined;
+            item.GardenArea = gardenArea && gardenArea.length != 0 ? parseInt(gardenArea.split(",").join("")) : undefined;
+            item.PlanningArea = planningArea && planningArea.length != 0 ? parseInt(planningArea.split(",").join("")) : undefined;
+            item.LandWidthMin = landWidthMin && landWidthMin.length != 0 ? parseInt(landWidthMin.split(",").join("")) : undefined;
+            item.LandWidthNearest = landWidthNearest && landWidthNearest.length != 0 ? parseInt(landWidthNearest.split(",").join("")) : undefined;
+            item.FrontageWidth = frontageWidth && frontageWidth.length != 0 ? parseInt(frontageWidth.split(",").join("")) : undefined;
+            item.DistanceToMainStreet = distanceToMainStreet && distanceToMainStreet.length != 0 ? parseInt(distanceToMainStreet.split(",").join("")) : undefined;
+
+            item.ConstructionInLegalArea = constructionInLegalArea && constructionInLegalArea.length != 0 ? parseInt(constructionInLegalArea.split(",").join("")) : undefined;
+            item.ConstructionOutLegalArea = constructionOutLegalArea && constructionOutLegalArea.length != 0 ? parseInt(constructionOutLegalArea.split(",").join("")) : undefined;
+            item.BuiltYear = builtYear && builtYear.length != 0 ? parseInt(builtYear.split(",").join("")) : undefined;
+
+            item.PlusNearSchool = this.state.PlusNearSchoolYes;
+            item.PlusMoreFrontage = this.state.PlusMoreFrontageYes;
+            item.PlusBusiness = this.state.PlusBusinessYes;
+            item.PlusOther = this.state.PlusOtherYes;
+            item.MinusDistortedShape = this.state.MinusDistortedShapeYes;
+            item.MinusNearGrave = this.state.MinusNearGraveYes;
+            item.MinusEntry = this.state.MinusEntryYes;
+            item.MinusOther = this.state.MinusOtherYes;
+
+            req.QuickValuationRE = item;
+
 
             let res = await HttpUtils.post<QuickValuationDto>(
                 ApiUrl.QuickValuation_Execute,
                 SMX.ApiActionCode.ValuationREs,
-                JSON.stringify(new QuickValuationDto())
+                JSON.stringify(req)
             );
 
             if (res) {
-                //this.setState({ Employee: res!.Employee! });
+                this.setState({
+                    ShowCalculate: false,
+                    VerifyOTP: res!.VerifyOTP!,
+                    QuickValuationRE: res!.QuickValuationRE!
+                });
             }
 
             this.props.GlobalStore.HideLoading();
@@ -243,15 +342,25 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
             this.props.GlobalStore.ShowLoading();
             let req = new QuickValuationDto();
             req.ActionCode = SMX.ActionCode.Verify_OTP;
+            req.OtpCode = this.state.txtOTP;
+            req.QuickValuationRE = this.state.QuickValuationRE;
 
             let res = await HttpUtils.post<QuickValuationDto>(
                 ApiUrl.QuickValuation_Execute,
                 SMX.ApiActionCode.ValuationREs,
-                JSON.stringify(new QuickValuationDto())
+                JSON.stringify(req)
             );
 
+            console.log(1234, res!.QuickValuationRE!);
+
+
             if (res) {
-                //this.setState({ Employee: res!.Employee! });
+                this.setState({
+                    ShowCalculate: false,
+                    VerifyOTP: false,
+                    ShowResult: res!.ShowResult!,
+                    QuickValuationRE: res!.QuickValuationRE!
+                });
             }
 
             this.props.GlobalStore.HideLoading();
@@ -262,11 +371,13 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
     }
 
     render() {
+        let item = this.state.QuickValuationRE;
+        let orderNo = 2;
         return (
             <View style={{ height: height, backgroundColor: "#FFF" }}>
                 <Toolbar Title="Tính giá nhanh Nhà đất phổ thông" navigation={this.props.navigation} HasDrawer={true} />
                 <KeyboardAvoidingView behavior="height" style={{ flex: 1, padding: 10 }}>
-                    <ScrollView>
+                    <ScrollView showsVerticalScrollIndicator={false}>
                         <View>
                             <View style={[styles.Item, { marginBottom: 10 }]}>
                                 <Text style={{ fontWeight: '600', fontSize: 18 }}>
@@ -336,7 +447,7 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                             <View style={styles.Item}>
                                 <View style={{ flex: 2, flexDirection: 'row' }}>
                                     <Text>Tên tuyến đường VT1 (mặt đường/phố) theo bảng giá TPBank </Text>
-                                    {/* <Text style={{ color: 'red' }}>*</Text> */}
+                                    <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                                 <View style={{ flex: 3 }}>
                                     <DropDownBox
@@ -379,7 +490,7 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                 <View style={{ flex: 3 }}>
                                     <TextInput
                                         multiline={false}
-                                        style={[Theme.TextView]}
+                                        style={[Theme.TextView, {}]}
                                         value={this.state.HouseNumber}
                                         onChangeText={(val) => {
                                             this.setState({ HouseNumber: val });
@@ -414,7 +525,6 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                             <View style={styles.Item}>
                                 <View style={{ flex: 2, flexDirection: 'row' }}>
                                     <Text>Diện tích đất vườn/ trồng cây lâu năm (m2) </Text>
-                                    <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                                 <View style={{ flex: 3 }}>
                                     <TextInputMask
@@ -437,7 +547,6 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                             <View style={styles.Item}>
                                 <View style={{ flex: 2, flexDirection: 'row' }}>
                                     <Text>Diện tích đất nằm trong quy hoạch (m2) </Text>
-                                    <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                                 <View style={{ flex: 3 }}>
                                     <TextInputMask
@@ -915,7 +1024,7 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                             </View>
 
                             {
-                                this.state.TotalPrice ? (
+                                this.state.VerifyOTP == true ? (
                                     <View>
                                         <View style={[styles.Item, { marginBottom: 10 }]}>
                                             <Text style={{ fontWeight: '600', fontSize: 18 }}>
@@ -938,64 +1047,17 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                                         suffixUnit: "",
                                                     }}
                                                     value={this.state.txtOTP}
-                                                    style={[Theme.TextInput]}
+                                                    style={[Theme.TextInput, { borderColor: "red" }]}
                                                     onChangeText={(val) => {
                                                         this.setState({ txtOTP: val });
                                                     }}
                                                 />
                                             </View>
                                         </View>
-                                    </View>
-                                ) : undefined
-                            }
-
-                            {
-                                !this.state.TotalPrice ? (
-                                    <View>
-                                        <View style={[styles.Item, { marginTop: 20 }]}>
-                                            <Text style={{ fontWeight: '600', fontSize: 18 }}>
-                                                II. KẾT QUẢ THẨM ĐỊNH GIÁ
-                                            </Text>
-                                        </View>
-                                        <View>
-                                            <Text>Đơn giá TPBank quy định (tra cứu theo Bảng giá TPBank từ VT1 đến VT11 tương ứng) (đồng)</Text>
-                                        </View>
-                                        <View style={{ marginTop: 3, height: 200, borderRadius: 5, borderWidth: 1, borderColor: 'red' }}>
-
-                                        </View>
-                                    </View>
-                                ) : undefined
-                            }
-
-                            {
-                                this.state.TotalPrice ? (
-                                    <TouchableOpacity
-                                        style={{ justifyContent: 'center', alignItems: 'center' }}
-                                        onPress={() => {
-                                            this.Verify_OTP();
-                                        }}
-                                    >
-                                        <LinearGradient
-                                            colors={["#7B35BB", "#5D2E86"]}
-                                            style={{
-                                                width: width / 3,
-                                                height: 50,
-                                                backgroundColor: "#007AFF",
-                                                borderRadius: 5,
-                                                justifyContent: "center",
-                                                marginTop: 30,
-                                                alignItems: "center",
-                                            }}
-                                        >
-                                            <Text style={Theme.BtnTextGradient}>Xác nhận</Text>
-                                        </LinearGradient>
-                                        <Text style={{ color: "#FFF", fontSize: 18, textAlign: "center" }}></Text>
-                                    </TouchableOpacity>
-                                ) : (
-                                        < TouchableOpacity
+                                        <TouchableOpacity
                                             style={{ justifyContent: 'center', alignItems: 'center' }}
                                             onPress={() => {
-                                                this.Calculate_Price();
+                                                this.Verify_OTP();
                                             }}
                                         >
                                             <LinearGradient
@@ -1010,11 +1072,229 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                                     alignItems: "center",
                                                 }}
                                             >
-                                                <Text style={Theme.BtnTextGradient}>Tính giá</Text>
+                                                <Text style={Theme.BtnTextGradient}>Xác nhận</Text>
                                             </LinearGradient>
                                             <Text style={{ color: "#FFF", fontSize: 18, textAlign: "center" }}></Text>
                                         </TouchableOpacity>
-                                    )
+                                    </View>
+                                ) : undefined
+                            }
+
+                            {
+                                this.state.ShowResult == true ? (
+                                    <View>
+                                        <View style={[styles.Item, { marginTop: 20 }]}>
+                                            <Text style={{ fontWeight: '600', fontSize: 18 }}>
+                                                II. KẾT QUẢ THẨM ĐỊNH GIÁ
+                                            </Text>
+                                        </View>
+                                        <View style={{ marginBottom: 10 }}>
+                                            <View style={{ flexDirection: 'row' }}>
+                                                <Text style={{}}>Đơn giá TPBank quy định (tra cứu theo Bảng giá TPBank từ VT1 đến VT11 tương ứng) (đồng) </Text>
+                                            </View>
+                                            <View style={{ marginTop: 3, borderWidth: 1, borderColor: "#acacac", borderRadius: 5 }}>
+                                                <Text
+                                                    style={{ color: "#1B2031", marginHorizontal: 7, marginVertical: 10 }}
+                                                >
+                                                    {this.state.QuickValuationRE.BankUnitPrice ? Utility.GetDecimalString(this.state.QuickValuationRE.TotalPrice) : ""}
+                                                </Text>
+                                            </View>
+                                        </View>
+                                        <View
+                                            style={{
+                                                width: "100%",
+                                                borderBottomWidth: 1,
+                                                borderColor: "gainsboro",
+                                                backgroundColor: '#eaf2f6'
+                                            }}
+                                        >
+                                            <View style={{ width: width - 95, paddingHorizontal: 10, paddingVertical: 5 }}>
+                                                <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                    <Text style={{ fontWeight: "600" }}>{1}. Đất ở</Text>
+                                                </View>
+                                                <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                    <Text style={{ fontWeight: "600" }}>Diện tích (m2): </Text>
+                                                    <Text style={{}}>{Utility.GetDecimalString(item.LandArea)}</Text>
+                                                </View>
+                                                <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                    <Text style={{ fontWeight: "600" }}>Đơn giá (đ/m2): </Text>
+                                                    <Text style={{}}>{Utility.GetDecimalString(item.LandUnitPrice)}</Text>
+                                                </View>
+                                                <View style={{ flexDirection: "row" }}>
+                                                    <Text style={{ fontWeight: "600" }}>Thành tiền (đ): </Text>
+                                                    <Text style={{ width: width - 100 }}>{Utility.GetDecimalString(item.LandTotalPrice)}</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                        {
+                                            item.GardenArea && item.GardenArea != null ? (
+                                                <View
+                                                    style={{
+                                                        width: "100%",
+                                                        borderBottomWidth: 1,
+                                                        borderColor: "gainsboro",
+                                                        backgroundColor: '#eaf2f6'
+                                                    }}
+                                                >
+                                                    <View style={{ width: width - 95, paddingHorizontal: 10, paddingVertical: 5 }}>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>{orderNo++}. Đất vườn/ trồng cây lâu năm</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>Diện tích (m2): </Text>
+                                                            <Text style={{}}>{Utility.GetDecimalString(item.GardenArea)}</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>Đơn giá (đ/m2): </Text>
+                                                            <Text style={{}}>{Utility.GetDecimalString(item.GardenUnitPrice)}</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row" }}>
+                                                            <Text style={{ fontWeight: "600" }}>Thành tiền (đ): </Text>
+                                                            <Text style={{ width: width - 100 }}>{Utility.GetDecimalString(item.GardenTotalPrice)}</Text>
+                                                        </View>
+                                                    </View>
+                                                </View>
+                                            ) : undefined
+                                        }
+                                        {
+                                            item.PlanningArea && item.PlanningArea != null ? (
+                                                <View
+                                                    style={{
+                                                        width: "100%",
+                                                        borderBottomWidth: 1,
+                                                        borderColor: "gainsboro",
+                                                        backgroundColor: '#eaf2f6'
+                                                    }}
+                                                >
+                                                    <View style={{ width: width - 95, paddingHorizontal: 10, paddingVertical: 5 }}>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>{orderNo++}. Đất nằm trong quy hoạch</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>Diện tích (m2): </Text>
+                                                            <Text style={{}}>{Utility.GetDecimalString(item.PlanningArea)}</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>Đơn giá (đ/m2): </Text>
+                                                            <Text style={{}}>{Utility.GetDecimalString(item.PlanningUnitPrice)}</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row" }}>
+                                                            <Text style={{ fontWeight: "600" }}>Thành tiền (đ): </Text>
+                                                            <Text style={{ width: width - 100 }}>{Utility.GetDecimalString(item.PlanningTotalPrice)}</Text>
+                                                        </View>
+                                                    </View>
+                                                </View>
+                                            ) : undefined
+                                        }
+                                        {
+                                            item.ConstructionInLegalArea && item.ConstructionInLegalArea != null ? (
+                                                <View
+                                                    style={{
+                                                        width: "100%",
+                                                        borderBottomWidth: 1,
+                                                        borderColor: "gainsboro",
+                                                        backgroundColor: '#eaf2f6'
+                                                    }}
+                                                >
+                                                    <View style={{ width: width - 95, paddingHorizontal: 10, paddingVertical: 5 }}>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>{orderNo++}. Công trình xây dựng có phép/ được chứng nhận</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>Diện tích (m2): </Text>
+                                                            <Text style={{}}>{Utility.GetDecimalString(item.ConstructionInLegalArea)}</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>Đơn giá (đ/m2): </Text>
+                                                            <Text style={{}}>{Utility.GetDecimalString(item.ConstructionInLegalUnitPrice)}</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row" }}>
+                                                            <Text style={{ fontWeight: "600" }}>Thành tiền (đ): </Text>
+                                                            <Text style={{ width: width - 100 }}>{Utility.GetDecimalString(item.ConstructionInLegalTotalPrice)}</Text>
+                                                        </View>
+                                                    </View>
+                                                </View>
+                                            ) : undefined
+                                        }
+                                        {
+                                            item.ConstructionOutLegalArea && item.ConstructionOutLegalArea != null ? (
+                                                <View
+                                                    style={{
+                                                        width: "100%",
+                                                        borderBottomWidth: 1,
+                                                        borderColor: "gainsboro",
+                                                        backgroundColor: '#eaf2f6'
+                                                    }}
+                                                >
+                                                    <View style={{ width: width - 95, paddingHorizontal: 10, paddingVertical: 5 }}>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>{orderNo++}. Công trình xây dựng không phép/ không được chứng nhận</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>Diện tích (m2): </Text>
+                                                            <Text style={{}}>{Utility.GetDecimalString(item.ConstructionOutLegalArea)}</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                            <Text style={{ fontWeight: "600" }}>Đơn giá (đ/m2): </Text>
+                                                            <Text style={{}}>{Utility.GetDecimalString(item.ConstructionOutLegalUnitPrice)}</Text>
+                                                        </View>
+                                                        <View style={{ flexDirection: "row" }}>
+                                                            <Text style={{ fontWeight: "600" }}>Thành tiền (đ): </Text>
+                                                            <Text style={{ width: width - 100 }}>{Utility.GetDecimalString(item.ConstructionOutLegalTotalPrice)}</Text>
+                                                        </View>
+                                                    </View>
+                                                </View>
+                                            ) : undefined
+                                        }
+
+                                        <View
+                                            style={{
+                                                width: "100%",
+                                                marginTop: 0,
+                                                borderBottomWidth: 1,
+                                                borderColor: "gainsboro",
+                                                paddingBottom: 0,
+                                                backgroundColor: '#eaf2f6'
+                                            }}
+                                        >
+                                            <View style={{ padding: 10, justifyContent: 'space-between', flexDirection: 'row' }}>
+                                                <View style={{ flexDirection: "row", marginBottom: 2, justifyContent: 'space-between' }}>
+                                                    <Text style={{ fontWeight: "600" }}>Tổng giá trị BĐS: </Text>
+                                                </View>
+                                                <View>
+                                                    <Text>{Utility.GetDecimalString(item.TotalPrice)}</Text>
+                                                </View>
+                                            </View>
+                                        </View>
+                                    </View>
+                                ) : undefined
+                            }
+
+                            {
+                                this.state.ShowCalculate == true ? (
+                                    < TouchableOpacity
+                                        style={{ justifyContent: 'center', alignItems: 'center' }}
+                                        onPress={() => {
+                                            this.Calculate_Price();
+                                        }}
+                                    >
+                                        <LinearGradient
+                                            colors={["#7B35BB", "#5D2E86"]}
+                                            style={{
+                                                width: width / 3,
+                                                height: 50,
+                                                backgroundColor: "#007AFF",
+                                                borderRadius: 5,
+                                                justifyContent: "center",
+                                                marginTop: 30,
+                                                alignItems: "center",
+                                            }}
+                                        >
+                                            <Text style={Theme.BtnTextGradient}>Tính giá</Text>
+                                        </LinearGradient>
+                                        <Text style={{ color: "#FFF", fontSize: 18, textAlign: "center" }}></Text>
+                                    </TouchableOpacity>
+                                ) : undefined
                             }
 
                         </View>

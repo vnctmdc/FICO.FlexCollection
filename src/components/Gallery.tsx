@@ -53,67 +53,65 @@ export default class Gallery extends React.Component<iProps, iState> {
 
     renderImage(image: adm_Attachment) {
         return (
-            <View>
+            <TouchableOpacity
+                onPress={() => {
+                    if (!this.checkIsNotImage(image)) {
+                        this.setState({ SelectedFullScreen: image });
+                    } else {
+                        this.props.navigation.navigate("PDFView", {
+                            AttachmentID: image.AttachmentID,
+                            ECMItemID: image.ECMItemID,
+                            FileName: image.FileName,
+                        });
+                    }
+                }}
+            >
                 {!this.checkIsNotImage(image) ? (
                     <Image
                         source={{
-                            uri: `${ApiUrl.Attachment_ImagePreview}?id=${image.AttachmentID}&ecm=${image.ECMItemID}&name=${image.FileName}&size=1&token=${GlobalCache.UserToken}`,
+                            uri: 'data:image/png;base64,' + image.FileContent
+                            //uri: `${ApiUrl.Attachment_ImagePreview}?id=${image.AttachmentID}&ecm=${image.ECMItemID}&name=${image.FileName}&size=1&token=${GlobalCache.UserToken}`,
                         }}
                         style={{
                             borderRadius: 8,
                             margin: 5,
-                            width: width / this.props.numberColumn - 15,
-                            height: width / this.props.numberColumn - 15,
+                            width: width / this.props.numberColumn - 19,
+                            height: width / this.props.numberColumn - 19,
                             resizeMode: "cover",
                         }}
                     />
                 ) : undefined}
                 <View
                     style={{
-                        borderWidth: 1,
-                        borderColor: "gainsboro",
+                        //borderWidth: 1,
+                        //borderColor: "gainsboro",
                         flexDirection: "row",
                         alignItems: "center",
-                        width: width / this.props.numberColumn - 15,
+                        width: width / this.props.numberColumn - 19,
                         justifyContent: "space-between",
-                        padding: 5,
-                        margin: 5,
+                        paddingLeft: 10,
+                        paddingBottom: 5
+                        //margin: 5,
                     }}
                 >
                     <Text
                         style={{
-                            margin: 5,
+                            //margin: 5,
                             fontWeight: "bold",
                             color: "#1C4694",
                             width: width / this.props.numberColumn - 100,
                         }}
                     >
-                        {image.DisplayName}
+                        {image.DocumentName}
                     </Text>
-                    <TouchableOpacity
-                        style={{ marginLeft: 10 }}
-                        onPress={() => {
-                            if (!this.checkIsNotImage(image)) {
-                                this.setState({ SelectedFullScreen: image });
-                            } else {
-                                this.props.navigation.navigate("PDFView", {
-                                    AttachmentID: image.AttachmentID,
-                                    ECMItemID: image.ECMItemID,
-                                    FileName: image.FileName,
-                                });
-                            }
-                        }}
-                    >
-                        <FontAwesome5 name="eye" size={25} color="#1C4694" />
-                    </TouchableOpacity>
                 </View>
-            </View>
+            </TouchableOpacity>
         );
     }
 
     render() {
         return (
-            <View style={{ flex: 1, padding: 5 }}>
+            <View style={{ flex: 1 }}>
                 <FlatList
                     data={this.props.Images}
                     numColumns={this.props.numberColumn}
@@ -125,13 +123,22 @@ export default class Gallery extends React.Component<iProps, iState> {
                         {/* <Image
                             source={{
                                 uri: 'data:image/png;base64,' + this.state.SelectedFullScreen.FileContent
-                                // uri:                                    
-                                //     ApiUrl.Attachment_ImagePreview +
-                                //     `?id=${this.state.SelectedFullScreen.AttachmentID}&name=${this.state.SelectedFullScreen.FileName}&ecm=${this.state.SelectedFullScreen.ECMItemID}&size=3`
+                                //uri:                                    
+                                //    ApiUrl.Attachment_ImagePreview +
+                                //    `?id=${this.state.SelectedFullScreen.AttachmentID}&name=${this.state.SelectedFullScreen.FileName}&ecm=${this.state.SelectedFullScreen.ECMItemID}&size=3`
                             }}
                             style={{ width: width, height: height, resizeMode: "contain" }}
                         /> */}
                         <ImageViewer
+                            imageUrls={[
+                                {
+                                    url: 'data:image/png;base64,' + this.state.SelectedFullScreen.FileContent
+                                },
+                            ]}
+                            backgroundColor={"white"}
+                            renderIndicator={() => null}
+                        />
+                        {/* <ImageViewer
                             imageUrls={[
                                 {
                                     url: `${ApiUrl.Attachment_ImagePreview}?id=${this.state.SelectedFullScreen.AttachmentID}&ecm=${this.state.SelectedFullScreen.ECMItemID}&name=${this.state.SelectedFullScreen.FileName}&size=0&token=${GlobalCache.UserToken}`,
@@ -139,7 +146,7 @@ export default class Gallery extends React.Component<iProps, iState> {
                             ]}
                             backgroundColor={"white"}
                             renderIndicator={() => null}
-                        />
+                        /> */}
                         <View
                             style={{
                                 position: "absolute",
@@ -155,7 +162,8 @@ export default class Gallery extends React.Component<iProps, iState> {
                                 style={{
                                     justifyContent: "space-around",
                                     alignItems: "center",
-                                    backgroundColor: "rgba(0, 0, 0, 0.5)",
+                                    backgroundColor: "#7B35BB",
+                                    //backgroundColor: "rgba(0, 0, 0, 0.5)",
                                     height: 40,
                                     marginLeft: 15,
                                     padding: 10,
@@ -174,7 +182,7 @@ export default class Gallery extends React.Component<iProps, iState> {
                                 <TouchableOpacity
                                     //@ts-ignore
                                     style={{
-                                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                                        backgroundColor: "#7B35BB",
                                         justifyContent: "center",
                                         alignItems: "center",
                                         height: 40,
@@ -198,7 +206,7 @@ export default class Gallery extends React.Component<iProps, iState> {
                                 <TouchableOpacity
                                     //@ts-ignore
                                     style={{
-                                        backgroundColor: "rgba(0, 0, 0, 0.5)",
+                                        backgroundColor: "#7B35BB",
                                         justifyContent: "center",
                                         alignItems: "center",
                                         height: 40,

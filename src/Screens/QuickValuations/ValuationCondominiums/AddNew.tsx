@@ -33,6 +33,9 @@ import SystemParameter from "../../../Entities/SystemParameter";
 import { LinearGradient } from "expo-linear-gradient";
 import { TextInputMask } from "react-native-masked-text";
 import DropDownBox from "../../../components/DropDownBox";
+import QuickValuationCondominium from "../../../Entities/QuickValuationCondominium";
+import { ClientMessage } from "../../../SharedEntity/SMXException";
+import Utility from "../../../Utils/Utility";
 
 const { width, height } = Dimensions.get("window");
 
@@ -58,6 +61,10 @@ interface iState {
     MinusOtherNo?: boolean;
     TotalPrice?: string;
     txtOTP?: string;
+    QuickValuationCondominium?: QuickValuationCondominium;
+    VerifyOTP: boolean;
+    ShowResult: boolean;
+    ShowCalculate: boolean;
 
 }
 
@@ -79,7 +86,11 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
             MinusOtherYes: false,
             MinusOtherNo: true,
             TotalPrice: '',
-            txtOTP: ''
+            txtOTP: '',
+            QuickValuationCondominium: new QuickValuationCondominium(),
+            VerifyOTP: false,
+            ShowResult: false,
+            ShowCalculate: true
         };
     }
     async componentDidMount() {
@@ -146,21 +157,63 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
         try {
             this.props.GlobalStore.ShowLoading();
             let req = new QuickValuationDto();
+            let item = new QuickValuationCondominium();
             req.ActionCode = SMX.ActionCode.Calculate_Price;
+
+            if (this.state.ProvinceID == undefined) {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Tỉnh/Thành phố] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            if (this.state.DistrictID == undefined) {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Quận/Huyện] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            if (this.state.BuildingID == undefined) {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Tên tòa nhà/Dự án/Khu đô thị] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            if (!this.state.Area || this.state.Area == '') {
+                this.props.GlobalStore.HideLoading();
+                let message = "[Diện tích] Không được để trống";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            var area = this.state.Area;
+            var unitPrice = this.state.MarketUnitPrice;
+            item.Province = this.state.ProvinceID;
+            item.District = this.state.DistrictID;
+            item.Project = this.state.BuildingID;
+            item.Area = area && area.length != 0 ? parseInt(area.split(",").join("")) : undefined;
+            item.MarketUnitPrice = unitPrice && unitPrice.length != 0 ? parseInt(unitPrice.split(",").join("")) : undefined;
+            item.PlusIsCorner = this.state.PlusIsCornerYes;
+            item.MinusNearGarbageRoom = this.state.MinusNearGarbageRoomYes;
+            item.MinusOther = this.state.MinusOtherYes;
+
+            req.QuickValuationCondominium = item;
 
             let res = await HttpUtils.post<QuickValuationDto>(
                 ApiUrl.QuickValuation_Execute,
                 SMX.ApiActionCode.ValuationCondominiums,
-                JSON.stringify(new QuickValuationDto())
+                JSON.stringify(req)
             );
 
             if (res) {
-                //this.setState({ Employee: res!.Employee! });
+                this.setState({
+                    ShowCalculate: false,
+                    VerifyOTP: res!.VerifyOTP!,
+                    QuickValuationCondominium: res!.QuickValuationCondominium!
+                });
             }
-
             this.props.GlobalStore.HideLoading();
         } catch (ex) {
-
+            this.props.GlobalStore.HideLoading();
+            this.props.GlobalStore.Exception = ex;
         }
 
     }
@@ -170,6 +223,23 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
             this.props.GlobalStore.ShowLoading();
             let req = new QuickValuationDto();
             req.ActionCode = SMX.ActionCode.Verify_OTP;
+            req.OtpCode = this.state.txtOTP;
+            req.QuickValuationCondominium = this.state.QuickValuationCondominium;
+
+            let res = await HttpUtils.post<QuickValuationDto>(
+                ApiUrl.QuickValuation_Execute,
+                SMX.ApiActionCode.ValuationCondominiums,
+                JSON.stringify(req)
+            );
+
+            if (res) {
+                this.setState({
+                    ShowCalculate: false,
+                    VerifyOTP: false,
+                    ShowResult: res!.ShowResult!,
+                    QuickValuationCondominium: res!.QuickValuationCondominium!
+                });
+            }
 
             this.props.GlobalStore.HideLoading();
         } catch (ex) {
@@ -183,7 +253,7 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
             <View style={{ height: height, backgroundColor: "#FFF" }}>
                 <Toolbar Title="Tính giá nhanh Chung cư" navigation={this.props.navigation} HasDrawer={true} />
                 <KeyboardAvoidingView behavior="height" style={{ flex: 1, padding: 10 }}>
-                    <ScrollView>
+                    <ScrollView showsVerticalScrollIndicator={false}>
                         <View>
                             <View style={[styles.Item, { marginBottom: 10 }]}>
                                 <Text style={{ fontWeight: '600', fontSize: 18 }}>
@@ -277,10 +347,11 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
                                     <Text style={{ fontWeight: '600' }}>Đơn giá (đồng) </Text>
                                 </View>
                                 <View style={{ flex: 3, borderWidth: 1, borderColor: "#acacac", borderRadius: 5 }}>
-                                    <TextInput
+                                    <Text
                                         style={{ color: "#1B2031", marginHorizontal: 7, marginVertical: 10 }}
-                                        value={this.state.MarketUnitPrice}
-                                    />
+                                    >
+                                        {this.state.QuickValuationCondominium.MarketUnitPrice ? Utility.GetDecimalString(this.state.QuickValuationCondominium.MarketUnitPrice) : ""}
+                                    </Text>
                                 </View>
                             </View>
                             <View style={[styles.Item, { marginTop: 20, marginBottom: 10 }]}>
@@ -400,7 +471,7 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
                                 </View>
                             </View>
                             {
-                                this.state.TotalPrice ? (
+                                this.state.ShowResult == true ? (
                                     <View>
                                         <View style={[styles.Item, { marginTop: 20 }]}>
                                             <Text style={{ fontWeight: '600', fontSize: 18 }}>
@@ -412,17 +483,18 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
                                                 <Text style={{ fontWeight: '600' }}>Tổng giá (đồng) </Text>
                                             </View>
                                             <View style={{ flex: 3, borderWidth: 1, borderColor: "#acacac", borderRadius: 5 }}>
-                                                <TextInput
+                                                <Text
                                                     style={{ color: "#1B2031", marginHorizontal: 7, marginVertical: 10 }}
-                                                    value={this.state.TotalPrice}
-                                                />
+                                                >
+                                                    {this.state.QuickValuationCondominium.TotalPrice? Utility.GetDecimalString(this.state.QuickValuationCondominium.TotalPrice) : ""}
+                                                </Text>
                                             </View>
                                         </View>
                                     </View>
                                 ) : undefined
                             }
                             {
-                                !this.state.TotalPrice ? (
+                                this.state.ShowCalculate == true ? (
                                     <TouchableOpacity
                                         style={{ justifyContent: 'center', alignItems: 'center' }}
                                         onPress={() => {
@@ -449,7 +521,7 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
                             }
 
                             {
-                                this.state.TotalPrice ? (
+                                this.state.VerifyOTP == true ? (
                                     <View>
                                         <View style={[styles.Item, { marginBottom: 10 }]}>
                                             <Text style={{ fontWeight: '600', fontSize: 18 }}>
@@ -472,7 +544,7 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
                                                         suffixUnit: "",
                                                     }}
                                                     value={this.state.txtOTP}
-                                                    style={[Theme.TextInput]}
+                                                    style={[Theme.TextInput, { borderColor: "red" }]}
                                                     onChangeText={(val) => {
                                                         this.setState({ txtOTP: val });
                                                     }}

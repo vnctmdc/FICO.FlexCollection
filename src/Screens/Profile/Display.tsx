@@ -55,7 +55,7 @@ export default class ProfilesSrc extends React.Component<iProps, iState> {
     render() {
         const { Employee } = this.state;
         return (
-            <View style={{ height: height, backgroundColor: "#FFF" }}>
+            <View style={{ height: height, backgroundColor: "#F6F6FE" }}>
                 <Toolbar Title="Thông tin người đăng nhập" navigation={this.props.navigation} />
 
                 <View
@@ -123,7 +123,7 @@ export default class ProfilesSrc extends React.Component<iProps, iState> {
                                 <Text>
                                     Chức danh
                                 </Text>
-                                <Text style={{ fontWeight: "bold" }}>{Employee.Description}</Text>
+                                <Text style={{ fontWeight: "600" }}>{Employee.Description}</Text>
                             </View>
                             <View
                                 style={{
@@ -136,7 +136,7 @@ export default class ProfilesSrc extends React.Component<iProps, iState> {
                                 <Text>
                                     Ngày sinh
                                 </Text>
-                                <Text style={{ fontWeight: "bold" }}>{Utility.GetDateString(Employee.DOB)}</Text>
+                                <Text style={{ fontWeight: "600" }}>{Utility.GetDateString(Employee.DOB)}</Text>
                             </View>
                             <View
                                 style={{
@@ -149,7 +149,7 @@ export default class ProfilesSrc extends React.Component<iProps, iState> {
                                 <Text>
                                     Số điện thoại
                                 </Text>
-                                <Text style={{ fontWeight: "bold" }}>{Employee.Mobile}</Text>
+                                <Text style={{ fontWeight: "600" }}>{Employee.Mobile}</Text>
                             </View>
                             <View
                                 style={{
@@ -162,7 +162,7 @@ export default class ProfilesSrc extends React.Component<iProps, iState> {
                                 <Text>
                                     Email
                                 </Text>
-                                <Text style={{ fontWeight: "bold" }}>{Employee.Email}</Text>
+                                <Text style={{ fontWeight: "600" }}>{Employee.Email}</Text>
                             </View>
                             <View
                                 style={{

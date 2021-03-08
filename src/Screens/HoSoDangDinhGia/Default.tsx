@@ -14,7 +14,7 @@ import { ClientMessage } from "../../SharedEntity/SMXException";
 import PopupModal from "../../components/PopupModal";
 import * as Enums from '../../constants/Enums';
 import ProcessValuationDocument from '../../Entities/ProcessValuationDocument';
-import ProcessValuationDocumentDto from '../../DtoParams/ProcessValuationDocumentDto';
+import ProcessValuationDocumentDto, { ProcessValuationDocumentFilter } from '../../DtoParams/ProcessValuationDocumentDto';
 
 const { width, height } = Dimensions.get("window");
 
@@ -41,6 +41,11 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
 
     async componentDidMount() {
         await this.LoadData(false);
+
+        this.props.GlobalStore.HoSoDangDinhGiaFilterTrigger = () => {
+            this.LoadData(false);
+        };
+        
     }
 
     async SetupForm() {
@@ -55,8 +60,19 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
         try {
             this.props.GlobalStore.ShowLoading();
             var req = new ProcessValuationDocumentDto();
-
             req.PageIndex = this.state.PageIndex;
+
+            let pvdFilter = new ProcessValuationDocumentFilter();
+            pvdFilter.CustomerName = '';
+            pvdFilter.Province = null;
+            pvdFilter.District = null;
+            pvdFilter.Town = null;
+
+            if (this.props.GlobalStore.DSFilterValue != undefined) {
+                req.Filter = this.props.GlobalStore.DSFilterValue;
+            } else {
+                req.Filter = pvdFilter;
+            }
 
             let res = await HttpUtils.post<ProcessValuationDocumentDto>(
                 ApiUrl.ProcessValuationDocument_Execute,
@@ -67,6 +83,7 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
             if (!isLoadMore) this.setState({ LstPVDocument: res!.LstPVDocument! });
             else this.setState({ LstPVDocument: this.state.LstPVDocument.concat(res!.LstPVDocument!) });
 
+            this.props.GlobalStore.DSFilterValue = undefined;
             this.props.GlobalStore.HideLoading();
         } catch (ex) {
             this.props.GlobalStore.HideLoading();
@@ -86,18 +103,10 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
                     alignItems: "center",
                 }}
             >
-                <TouchableOpacity
+                <View
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
-                    }}
-                    onPress={() => {
-                        // this.props.navigation.navigate("CollectionDocumentDisplay", {
-                        //     DocumentID: item.DocumentID,
-                        //     CustomerID: item.CustomerID,
-                        //     DocumentActionID: item.DocumentActionID,
-                        // });
-                        alert('HIHI');
                     }}
                 >
                     <View
@@ -107,15 +116,15 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
                             borderRadius: 100,
                             alignItems: "center",
                             justifyContent: "center",
-                            backgroundColor: '#2e82c4'
+                            backgroundColor: '#F1E0FF'
                         }}
                     >
                         <Text style={{ fontWeight: "600", fontSize: 17, color: "#000000" }}>
                             {index + 1}
                         </Text>
                     </View>
-                    <View style={{ width: width - 95, padding: 10 }}>
-                        <Text style={{ width: width - 95, fontWeight: "bold" }}>{item.Code}</Text>
+                    <View style={{ width: width - 60, padding: 10 }}>
+                        <Text style={{ width: width - 95, fontWeight: "bold", color: '#3388cc' }}>{item.Code}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
                             <Text>Loại TS cấp 1: </Text>
                             <Text style={{ fontWeight: "600" }}>{item.MortgageAssetCode1Name}</Text>
@@ -133,20 +142,7 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
                             <Text style={{ fontWeight: "600", width: width - 95 }}>{item.SLAPlanEnd}</Text>
                         </View>
                     </View>
-                </TouchableOpacity>
-                {
-                    <TouchableOpacity
-                        style={{
-                            width: 25,
-                            alignItems: "center",
-                            justifyContent: "center",
-                        }}
-                        onPress={() => alert('some')}
-                    >
-                        <AntDesign name="right" size={25} color="#FF9800" />
-
-                    </TouchableOpacity>
-                }
+                </View>
             </View>
         );
     }
@@ -170,10 +166,13 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
                         <TouchableOpacity
                             activeOpacity={0.5}
                             onPress={() => {
-                                this.props.navigation.navigate('KeHoachVisitNgayMap');
+                                this.props.navigation.navigate("HoSoFilter", {
+                                    Screen: Enums.FeatureId.HoSoDangDinhGia,
+                                });
+                                //this.props.navigation.navigate('KeHoachVisitNgayMap');
                             }}
                         >
-                            <AntDesign name="search1" size={22} color="#FFFFFF" />
+                            <AntDesign name="search1" size={25} color="#FFFFFF" />
                         </TouchableOpacity>
                     </View>
                 </Toolbar>

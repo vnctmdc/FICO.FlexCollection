@@ -15,7 +15,7 @@ import PopupModal from "../../components/PopupModal";
 import * as Enums from '../../constants/Enums';
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import ProcessValuationDocument from '../../Entities/ProcessValuationDocument';
-import ProcessValuationDocumentDto from '../../DtoParams/ProcessValuationDocumentDto';
+import ProcessValuationDocumentDto, { ProcessValuationDocumentFilter } from '../../DtoParams/ProcessValuationDocumentDto';
 import PopupModalUpdateNote from '../../components/PopupModalUpdateNote';
 import { LinearGradient } from 'expo-linear-gradient';
 
@@ -29,11 +29,6 @@ interface iProps {
 interface iState {
     PageIndex: number;
     LstPVDocument?: ProcessValuationDocument[];
-    showConfirmApprove: boolean;
-    showConfirmReject: boolean;
-    CommentApprove: string;
-    CommentReject: string;
-    PVDID?: number;
 }
 
 @inject(SMX.StoreName.GlobalStore)
@@ -44,15 +39,17 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
         super(props);
         this.state = {
             PageIndex: 0,
-            showConfirmApprove: false,
-            showConfirmReject: false,
-            CommentApprove: '',
-            CommentReject: ''
+            
         };
     }
 
     async componentDidMount() {
         await this.LoadData(false);
+
+        this.props.GlobalStore.ApprovingValuationFilterTrigger = () => {
+            this.LoadData(false);
+        };
+
     }
 
     async SetupForm() {
@@ -67,8 +64,19 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
         try {
             this.props.GlobalStore.ShowLoading();
             var req = new ProcessValuationDocumentDto();
-
             req.PageIndex = this.state.PageIndex;
+            
+            let pvdFilter = new ProcessValuationDocumentFilter();
+            pvdFilter.CustomerName = '';
+            pvdFilter.Province = null;
+            pvdFilter.District = null;
+            pvdFilter.Town = null;
+
+            if (this.props.GlobalStore.DSFilterValue != undefined) {
+                req.Filter = this.props.GlobalStore.DSFilterValue;
+            } else {
+                req.Filter = pvdFilter;
+            }
 
             let res = await HttpUtils.post<ProcessValuationDocumentDto>(
                 ApiUrl.ProcessValuationDocument_Execute,
@@ -78,75 +86,14 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
 
             if (!isLoadMore) this.setState({ LstPVDocument: res!.LstPVDocument! });
             else this.setState({ LstPVDocument: this.state.LstPVDocument.concat(res!.LstPVDocument!) });
-
+            
+            this.props.GlobalStore.DSFilterValue = undefined;
             this.props.GlobalStore.HideLoading();
         } catch (ex) {
             this.props.GlobalStore.HideLoading();
             this.props.GlobalStore.Exception = ex;
         }
 
-    }
-
-    async onApproval() {
-        try {
-            this.props.GlobalStore.ShowLoading();
-            var req = new ProcessValuationDocumentDto();
-
-            if (!this.state.CommentApprove || this.state.CommentApprove == '') {
-                this.props.GlobalStore.HideLoading();
-                let message = "[Nội dung] Không được để trống";
-                this.props.GlobalStore.Exception = ClientMessage(message);
-                return;
-            }
-            req.CommentApprove = this.state.CommentApprove;
-            req.PVDID = this.state.PVDID;
-
-            let res = await HttpUtils.post<ProcessValuationDocumentDto>(
-                ApiUrl.ProcessValuationDocument_Execute,
-                SMX.ApiActionCode.Approve,
-                JSON.stringify(req)
-            );
-
-            this.props.GlobalStore.HideLoading();
-            let mess = "Phê duyệt thành công!";
-                this.props.GlobalStore.Exception = ClientMessage(mess);
-
-        } catch (ex) {
-            this.props.GlobalStore.HideLoading();
-            this.props.GlobalStore.Exception = ex;
-
-        }
-    }
-
-    async onReject() {
-        try {
-            this.props.GlobalStore.ShowLoading();
-            var req = new ProcessValuationDocumentDto();
-
-            if (!this.state.CommentReject || this.state.CommentReject == '') {
-                this.props.GlobalStore.HideLoading();
-                let message = "[Nội dung] Không được để trống";
-                this.props.GlobalStore.Exception = ClientMessage(message);
-                return;
-            }
-            req.CommentReject = this.state.CommentReject;
-            req.PVDID = this.state.PVDID;
-
-            let res = await HttpUtils.post<ProcessValuationDocumentDto>(
-                ApiUrl.ProcessValuationDocument_Execute,
-                SMX.ApiActionCode.Reject,
-                JSON.stringify(req)
-            );
-
-            this.setState({});
-
-            this.props.GlobalStore.HideLoading();
-
-        } catch (ex) {
-            this.props.GlobalStore.HideLoading();
-            this.props.GlobalStore.Exception = ex;
-
-        }
     }
 
     renderItem(index: number, item: ProcessValuationDocument) {
@@ -166,12 +113,9 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
                         alignItems: "center",
                     }}
                     onPress={() => {
-                        // this.props.navigation.navigate("CollectionDocumentDisplay", {
-                        //     DocumentID: item.DocumentID,
-                        //     CustomerID: item.CustomerID,
-                        //     DocumentActionID: item.DocumentActionID,
-                        // });
-                        alert('HIHI');
+                        this.props.navigation.navigate("BCDGChoDuyet", {
+                            ProcessValuationDocumentID: item.ProcessValuationDocumentID
+                        });
                     }}
                 >
                     <View
@@ -181,7 +125,7 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
                             borderRadius: 100,
                             alignItems: "center",
                             justifyContent: "center",
-                            backgroundColor: '#2e82c4'
+                            backgroundColor: '#F1E0FF'
                         }}
                     >
                         <Text style={{ fontWeight: "600", fontSize: 17, color: "#000000" }}>
@@ -189,9 +133,9 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
                         </Text>
                     </View>
                     <View style={{ width: width - 95, padding: 10 }}>
-                        <Text style={{ width: width - 95, fontWeight: "bold" }}>{item.CustomerName}</Text>
+                        <Text style={{ width: width - 95, fontWeight: "bold", color: '#3388cc' }}>{item.CustomerName}</Text>
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                            <Text>Code: </Text>
+                            <Text>Số BCĐG: </Text>
                             <Text style={{ fontWeight: "600" }}>{item.Code}</Text>
                         </View>
                         <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
@@ -211,8 +155,18 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
                             <Text style={{ fontWeight: "600" }}>{Utility.GetDecimalString(item.TotalValuationAmount)}</Text>
                         </View>
                     </View>
+                    <View
+                        style={{
+                            width: 25,
+                            alignItems: "center",
+                            justifyContent: "center",
+                        }}
+                    >
+                        <AntDesign name="right" size={25} color="#FF9800" />
+
+                    </View>
                 </TouchableOpacity>
-                <View style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
+                {/* <View style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
                     <TouchableOpacity
                         style={{ padding: 5 }}
                         onPress={() => {
@@ -231,18 +185,10 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
                     >
                         <FontAwesome5 name="times-circle" size={25} color={"#e63946"} />
                     </TouchableOpacity>
-                </View>
+                </View> */}
             </View>
         );
     }
-
-    showConfirmApprove = () => {
-        this.setState({ showConfirmApprove: !this.state.showConfirmApprove });
-    };
-
-    showConfirmReject = () => {
-        this.setState({ showConfirmReject: !this.state.showConfirmReject });
-    };
 
     render() {
         return (
@@ -263,147 +209,17 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
                         <TouchableOpacity
                             activeOpacity={0.5}
                             onPress={() => {
-                                this.props.navigation.navigate('KeHoachVisitNgayMap');
+                                this.props.navigation.navigate("HoSoFilter", {
+                                    Screen: Enums.FeatureId.ApprovingValuation,
+                                });
+                                //this.props.navigation.navigate('KeHoachVisitNgayMap');
                             }}
                         >
-                            <AntDesign name="search1" size={22} color="#FFFFFF" />
+                            <AntDesign name="search1" size={25} color="#FFFFFF" />
                         </TouchableOpacity>
                     </View>
                 </Toolbar>
-                <PopupModalUpdateNote
-                    resetState={this.showConfirmApprove}
-                    modalVisible={this.state.showConfirmApprove}
-                    title="Phê duyệt"
-                >
-                    <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-                        <Text >Nội dung </Text>
-                        <Text style={{ color: 'red' }}>*</Text>
-                    </View>
-                    <View style={{}}>
-                        <TextInput
-                            multiline={true}
-                            numberOfLines={4}
-                            style={[Theme.TextInput, { height: 100 }]}
-                            value={this.state.CommentApprove}
-                            onChangeText={(val) => {
-                                this.setState({ CommentApprove: val });
-                            }}
-                        />
-                    </View>
-                    <View style={{ marginTop: 10, flexDirection: "row", justifyContent: "flex-end" }}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                this.setState({ showConfirmApprove: false }, async () => {
-                                    await this.onApproval();
-                                });
-                            }}
-                        >
-                            <LinearGradient
-                                colors={["#7B35BB", "#5D2E86"]}
-                                style={{
-                                    //width: 80,
-                                    backgroundColor: "#722ED1",
-                                    padding: 10,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    borderRadius: 5,
-                                    alignSelf: "center",
-                                    marginRight: 5,
-                                }}
-                            >
-                                <Text style={Theme.BtnTextGradient}>
-                                    Phê duyệt
-                                </Text>
-                            </LinearGradient>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{
-                                //width: 80,
-                                backgroundColor: "#E6E9EE",
-                                padding: 10,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                borderRadius: 5,
-                                alignSelf: "center",
-                                marginLeft: 5,
-                            }}
-                            onPress={() => {
-                                this.setState({ showConfirmApprove: false });
-                            }}
-                        >
-                            <Text style={{ color: "#1B2031", fontSize: 15 }}>
-                                Bỏ qua
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </PopupModalUpdateNote>
-                <PopupModalUpdateNote
-                    resetState={this.showConfirmReject}
-                    modalVisible={this.state.showConfirmReject}
-                    title="Từ chối phê duyệt"
-                >
-                    <View style={{ flexDirection: 'row', marginBottom: 5 }}>
-                        <Text >Nội dung </Text>
-                        <Text style={{ color: 'red' }}>*</Text>
-                    </View>
-                    <View style={{}}>
-                        <TextInput
-                            multiline={true}
-                            numberOfLines={4}
-                            style={[Theme.TextInput, { height: 100 }]}
-                            value={this.state.CommentReject}
-                            onChangeText={(val) => {
-                                this.setState({ CommentReject: val });
-                            }}
-                        />
-                    </View>
-                    <View style={{ marginTop: 10, flexDirection: "row", justifyContent: "flex-end" }}>
-                        <TouchableOpacity
-                            onPress={() => {
-                                this.setState({ showConfirmReject: false }, async () => {
-                                    await this.onApproval();
-                                });
-                            }}
-                        >
-                            <LinearGradient
-                                colors={["#7B35BB", "#5D2E86"]}
-                                style={{
-                                    //width: 80,
-                                    backgroundColor: "#722ED1",
-                                    padding: 10,
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    borderRadius: 5,
-                                    alignSelf: "center",
-                                    marginRight: 5,
-                                }}
-                            >
-                                <Text style={Theme.BtnTextGradient}>
-                                    Phê duyệt
-                                </Text>
-                            </LinearGradient>
-                        </TouchableOpacity>
-                        <TouchableOpacity
-                            style={{
-                                //width: 80,
-                                backgroundColor: "#E6E9EE",
-                                padding: 10,
-                                justifyContent: "center",
-                                alignItems: "center",
-                                borderRadius: 5,
-                                alignSelf: "center",
-                                marginLeft: 5,
-                            }}
-                            onPress={() => {
-                                this.setState({ showConfirmReject: false });
-                            }}
-                        >
-                            <Text style={{ color: "#1B2031", fontSize: 15 }}>
-                                Bỏ qua
-                            </Text>
-                        </TouchableOpacity>
-                    </View>
-                </PopupModalUpdateNote>
+                
 
                 <FlatList
                     data={this.state.LstPVDocument}

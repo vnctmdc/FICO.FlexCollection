@@ -11,7 +11,7 @@ export default StyleSheet.create({
     },
     TextView: {
         borderWidth: 1,
-        borderColor: "gray",
+        borderColor: "#99b4d1",
         backgroundColor: "#fff",
         borderRadius: 5,
         padding: 7,
@@ -55,6 +55,8 @@ export default StyleSheet.create({
         borderRadius: 5,
         fontSize: 15,
         backgroundColor: "#FFFFFF",
+        borderWidth: 1,
+        borderColor: "#99b4d1",
     },
     TimeInput: {
         flexDirection: "row",

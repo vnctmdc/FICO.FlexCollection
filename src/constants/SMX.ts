@@ -218,6 +218,14 @@ export default class SMX {
         static ValuationREs = "ValuationREs";
         static ValuationVehicles = "ValuationVehicles";
         static LoadData = "LoadData";
+        static Actions = "Actions";
+        static SaveActions = "SaveActions";
+        static CheckInActions = "CheckInActions";
+        static GetAttachmentByECMID = "GetAttachmentByECMID";
+        static GetPVDApproving = "GetPVDApproving";
+        static DocumentRequest = "DocumentRequest";
+        static SaveData = "SaveData";
+
     };
 
     static Features = class {
@@ -267,5 +275,28 @@ export default class SMX {
         static BienBanThamDinh = "BienBanThamDinh";
         static SiteCheckValuationReport = "BCTĐ";
     }
+
+    static MortgageAssetCode2 = class {
+        // BDS
+        static BatchEquipments = "BatchEquipments";
+        static BatchVehicles = "BatchVehicles";
+        static Equipments = "Equipments";
+        static REApartments = "REApartments";
+        static REBuildings = "REBuildings";
+        static RECondominiums = "RECondominiums";
+        static REFactories = "REFactories";
+        static REProjects = "REProjects";
+        static REResidentials = "REResidentials";
+        static VehicleRoads = "VehicleRoads";
+        static Vessels = "Vessels";
+        static Workfields = "Workfields";
+    }
+    static ProcessValuationREFrontageType = class {
+        static readonly dicProcessValuationREFrontageType: iKeyValuePair<Enums.ProcessValuationREFrontageType, string>[] = [
+            { Key: Enums.ProcessValuationREFrontageType.MatDuongPho, Value: "Mặt đường/Phố" },
+            { Key: Enums.ProcessValuationREFrontageType.MatNgoHem, Value: "Mặt ngõ/hẻm" },
+            { Key: Enums.ProcessValuationREFrontageType.MatDuongNoiBo, Value: "Mặt đường nội bộ" },
+        ];
+    };
 
 }

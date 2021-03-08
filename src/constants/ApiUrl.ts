@@ -27,6 +27,7 @@ class ApiUrl {
     static Global_LogError = EnvConfig.getApiHost() + "/api/Global/LogError";
 
     static Attachment_ImagePreview = EnvConfig.getApiHost() + "/AttachmentImageViewer.ashx";
+    static Attachment_PDFView = EnvConfig.getApiHost() + "/PDFViewer.pdf";
 
     // chart
     static Home_Chart = EnvConfig.getApiHost() + "/Chart/Home.aspx";

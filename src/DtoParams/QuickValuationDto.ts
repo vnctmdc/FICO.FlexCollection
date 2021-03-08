@@ -1,11 +1,15 @@
+import QuickValuationCondominium from "../Entities/QuickValuationCondominium";
+import QuickValuationRE from "../Entities/QuickValuationRE";
 import QuickValuationVehicle from "../Entities/QuickValuationVehicle";
 import SystemParameter from "../Entities/SystemParameter";
 
 export default class QuickValuationDto {
     //RE
+    public QuickValuationRE?: QuickValuationRE;
     public LstTown?: SystemParameter[];
     public TownID?: number;
     //Chung cu
+    public QuickValuationCondominium?: QuickValuationCondominium;
     public LstProvince?: SystemParameter[];
     public LstDistrict?: SystemParameter[];
     public LstBuilding?: SystemParameter[];
@@ -24,5 +28,7 @@ export default class QuickValuationDto {
     public LstModel?: SystemParameter[];
     public ActionCode?: string;
     public OtpCode?: string;
+    public VerifyOTP?: boolean;
+    public ShowResult?: boolean;
     
 }
