@@ -26,6 +26,10 @@ import { inject, observer } from "mobx-react";
 import GlobalStore from "../Stores/GlobalStore";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import GlobalCache from "../Caches/GlobalCache";
+import * as Location from "expo-location";
+import * as Permissions from "expo-permissions";
+import LogManager from "../Utils/LogManager";
+import MarkerObject from "../SharedEntity/MarkerObject";
 
 const { width, height } = Dimensions.get("window");
 
@@ -45,6 +49,7 @@ export default class Home extends Component<iProps, iState> {
     }
 
     async componentDidMount() {
+        await this.getLocationAsync();
         BackHandler.addEventListener("hardwareBackPress", this.handleBackPress);
 
         Keyboard.addListener("keyboardWillShow", this.onKeyboardShow);
@@ -65,6 +70,29 @@ export default class Home extends Component<iProps, iState> {
     handleBackPress = () => {
         return true;
     };
+
+    async getLocationAsync() {
+        try {
+            let statusAfter: any = null;
+            let { status } = await Permissions.getAsync(Permissions.LOCATION);
+            if (status !== "granted") {
+                LogManager.Log("Not permission");
+                statusAfter = (await Permissions.askAsync(Permissions.LOCATION)).status;
+                if (statusAfter !== "granted") {
+                    LogManager.Log("Not permission");
+                    return;
+                }
+            }
+
+            let location = await Location.getCurrentPositionAsync({});
+            LogManager.Log("Location origin: " + JSON.stringify(location));
+            this.setState({
+                location: new MarkerObject(1, location.coords.latitude, location.coords.longitude, "Vị trí hiện tại"),
+            });
+        } catch (ex) {
+            LogManager.Log("Get Location Error: " + ex.toString());
+        }
+    }
 
     render() {
         return (

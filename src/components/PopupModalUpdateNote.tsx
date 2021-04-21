@@ -27,7 +27,7 @@ export default class PopupModalUpdateNote extends Component<iProp, any> {
                 backdropTransitionOutTiming={0}
             >
                 <KeyboardAvoidingView
-                    behavior="position" style={{ flex: 1 }}
+                    behavior="padding" style={{ flex: 1 }}
                     keyboardVerticalOffset={-150}
                 >
                     <View style={styles.container}>
@@ -59,7 +59,7 @@ export default class PopupModalUpdateNote extends Component<iProp, any> {
 const styles = StyleSheet.create({
     container: {
         position: "absolute",
-        top: 80,
+        top: 60,
         left: 0,
         right: 0,
         //marginLeft: "5%",

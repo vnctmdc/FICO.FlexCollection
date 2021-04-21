@@ -28,6 +28,20 @@ export default class Utility {
         } else return "";
     }
 
+    static ConvertToUtcDateTimeApi(date: Date) {
+        //todo Hiep fix chenh múi giờ post lêm
+        let result: any;
+        if (date != null || date != undefined) {
+            var dateNow = new Date();
+            let gmt = 0;
+            gmt = (date.getTimezoneOffset() / 60);//số phút chênh chia 60 ra dc số giờ lệch (-7h so với múi +0 nên  -1)
+            let val = new Date(date.getFullYear(), date.getMonth(), date.getDate(), date.getHours() - gmt, date.getMinutes(), date.getSeconds());
+            result = moment(val).utc().format();
+            return result;
+        }
+        return null;
+    }
+
     static ConvertToDateTimeToRequest(val: Date) {
         if (val) {
             let val1 = new Date(val);
@@ -40,17 +54,17 @@ export default class Utility {
         return null;
     }
 
-     static ConvertToUtcDateTime(valStr: any): Date {
-         if (valStr && valStr !== "") {
-             let val = new Date(valStr);
-             let hoursDiff = val.getHours() - val.getTimezoneOffset() / 60;
-             let minuteDiff = (val.getHours() - val.getTimezoneOffset()) % 60;
-             val.setHours(hoursDiff);
-             val.setMinutes(minuteDiff);
-             return val;
-         }
-         return null;
-     }
+    static ConvertToUtcDateTime(valStr: any): Date {
+        if (valStr && valStr !== "") {
+            let val = new Date(valStr);
+            let hoursDiff = val.getHours() - val.getTimezoneOffset() / 60;
+            let minuteDiff = (val.getHours() - val.getTimezoneOffset()) % 60;
+            val.setHours(hoursDiff);
+            val.setMinutes(minuteDiff);
+            return val;
+        }
+        return null;
+    }
 
     // static ConvertToUtcDateTime(date: any): any {
     //     //todo Hiep fix chenh múi giờ post lêm
@@ -108,7 +122,7 @@ export default class Utility {
     //Trả ra Kỳ trả nợ dạng string
     static GetKyTraNo(value: number): String {
         if (value !== null && value !== undefined) {
-            if(value.toString.length == 1)
+            if (value.toString.length == 1)
                 return value.toString();
             return "0" + value.toString();
         } else {
@@ -214,6 +228,56 @@ export default class Utility {
             return "";
         }
     }
+    static GetDecimalStringVer2(num: number): string {
+        if (num !== null && num !== undefined) {
+          var num_parts = num.toString().split(",");
+          //num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          return num_parts.join("");
+        } else {
+          return "";
+        }
+      }
+      static GetDecimalStringEdit(num?: number, digitNumber: number = 0): string {
+        if (num === null || num === undefined) {
+          return "";
+        }
+        if (digitNumber == 0) {
+          if (num === 0) {
+            return "0";
+          }
+          if (num !== null && num !== undefined && num !== 0) {
+            var num_parts = num.toString().split(".");
+            num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+            return num_parts.join(".");
+          } else {
+            return "";
+          }
+        }
+    
+        if (digitNumber < 0) {
+          return "";
+        }
+        if (num !== null && num !== undefined) {
+          var num_parts = num.toString().split(".");
+          if (num_parts.length <= 1) {
+            num_parts[1] = "0".repeat(digitNumber);
+          } else {
+            num_parts[1] =
+              num_parts[1].toString() +
+              "0".repeat(digitNumber - num_parts[1].toString().length);
+          }
+          num_parts[0] = num_parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ",");
+          if (digitNumber === 0) {
+            return num_parts[0];
+          }
+          return num_parts.join(".");
+        } else {
+          if (digitNumber === 0) {
+            return "0";
+          }
+          return `0.${"0".repeat(digitNumber)}`;
+        }
+      }
 
     // Cast 1 string sang Date
     static ConvertToDate(dateString: string): Date | null {

@@ -26,6 +26,7 @@ import HttpUtils from "../../../Utils/HttpUtils";
 import SMX from "../../../constants/SMX";
 import { inject, observer } from "mobx-react";
 import GlobalStore from "../../../Stores/GlobalStore";
+import AntDesign from "react-native-vector-icons/AntDesign";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
 import GlobalCache from "../../../Caches/GlobalCache";
 import QuickValuationDto from "../../../DtoParams/QuickValuationDto";
@@ -68,22 +69,14 @@ interface iState {
     BuiltYear?: string;
     //
     PlusNearSchoolYes: boolean;
-    PlusNearSchoolNo: boolean;
     PlusMoreFrontageYes: boolean;
-    PlusMoreFrontageNo: boolean;
     PlusBusinessYes: boolean;
-    PlusBusinessNo: boolean;
     PlusOtherYes: boolean;
-    PlusOtherNo: boolean;
     //
     MinusDistortedShapeYes: boolean;
-    MinusDistortedShapeNo: boolean;
     MinusNearGraveYes: boolean;
-    MinusNearGraveNo: boolean;
     MinusEntryYes: boolean;
-    MinusEntryNo: boolean;
     MinusOtherYes: boolean;
-    MinusOtherNo: boolean;
 
     BankUnitPrice?: string;
     TotalPrice?: string;
@@ -117,22 +110,14 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
             BuiltYear: '',
             //
             PlusNearSchoolYes: false,
-            PlusNearSchoolNo: true,
             PlusMoreFrontageYes: false,
-            PlusMoreFrontageNo: true,
             PlusBusinessYes: false,
-            PlusBusinessNo: true,
             PlusOtherYes: false,
-            PlusOtherNo: true,
             //
             MinusDistortedShapeYes: false,
-            MinusDistortedShapeNo: true,
             MinusNearGraveYes: false,
-            MinusNearGraveNo: true,
             MinusEntryYes: false,
-            MinusEntryNo: true,
             MinusOtherYes: false,
-            MinusOtherNo: true,
 
             BankUnitPrice: '',
             TotalPrice: '',
@@ -164,6 +149,50 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
 
         this.props.GlobalStore.HideLoading();
 
+    }
+
+    async refreshData() {
+        this.setState({
+            LstProvince: [],
+            ProvinceID: null,
+            LstDistrict: [],
+            DistrictID: null,
+            LstTown: [],
+            TownID: null,
+            LstStreet: [],
+            StreetID: null,
+            HouseNumber: '',
+            LandArea: '',
+            GardenArea: '',
+            PlanningArea: '',
+            LandWidthMin: '',
+            LandWidthNearest: '',
+            FrontageWidth: '',
+            DistanceToMainStreet: '',
+            ConstructionInLegalArea: '',
+            ConstructionOutLegalArea: '',
+            BuiltYear: '',
+            //
+            PlusNearSchoolYes: false,
+            PlusMoreFrontageYes: false,
+            PlusBusinessYes: false,
+            PlusOtherYes: false,
+            //
+            MinusDistortedShapeYes: false,
+            MinusNearGraveYes: false,
+            MinusEntryYes: false,
+            MinusOtherYes: false,
+
+            BankUnitPrice: '',
+            TotalPrice: '',
+            txtOTP: '',
+            QuickValuationRE: new QuickValuationRE(),
+            VerifyOTP: false,
+            ShowResult: false,
+            ShowCalculate: true,
+
+        });
+        await this.SetUpForm();
     }
 
     async GetDistrictByProvince() {
@@ -351,9 +380,6 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                 JSON.stringify(req)
             );
 
-            console.log(1234, res!.QuickValuationRE!);
-
-
             if (res) {
                 this.setState({
                     ShowCalculate: false,
@@ -375,7 +401,15 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
         let orderNo = 2;
         return (
             <View style={{ height: height, backgroundColor: "#FFF" }}>
-                <Toolbar Title="Tính giá nhanh Nhà đất phổ thông" navigation={this.props.navigation} HasDrawer={true} />
+                <Toolbar Title="Tính giá nhanh Nhà đất phổ thông" navigation={this.props.navigation} HasDrawer={true}>
+                    <View style={{ marginLeft: 15 }}>
+                        <TouchableOpacity activeOpacity={0.5} onPress={() => {
+                            this.refreshData();
+                        }}>
+                            <AntDesign name="reload1" size={23} color="#FFFFFF" />
+                        </TouchableOpacity>
+                    </View>
+                </Toolbar>
                 <KeyboardAvoidingView behavior="height" style={{ flex: 1, padding: 10 }}>
                     <ScrollView showsVerticalScrollIndicator={false}>
                         <View>
@@ -743,33 +777,19 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                             </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
+                            <View style={{ paddingLeft: width / 2, flexDirection: "row", alignItems: "center", padding: 10 }}>
                                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.PlusNearSchoolYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ PlusNearSchoolNo: false });
-                                            else this.setState({ PlusNearSchoolNo: true });
                                             this.setState({ PlusNearSchoolYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.PlusNearSchoolNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ PlusNearSchoolYes: false });
-                                            else this.setState({ PlusNearSchoolYes: true });
-                                            this.setState({ PlusNearSchoolNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.PlusNearSchoolYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
                             <View style={styles.ItemNote}>
@@ -778,33 +798,19 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                             </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
+                            <View style={{ paddingLeft: width / 2, flexDirection: "row", alignItems: "center", padding: 10 }}>
                                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.PlusMoreFrontageYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ PlusMoreFrontageNo: false });
-                                            else this.setState({ PlusMoreFrontageNo: true });
                                             this.setState({ PlusMoreFrontageYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.PlusMoreFrontageNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ PlusMoreFrontageYes: false });
-                                            else this.setState({ PlusMoreFrontageYes: true });
-                                            this.setState({ PlusMoreFrontageNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.PlusMoreFrontageYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
                             <View style={styles.ItemNote}>
@@ -813,33 +819,19 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                             </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
+                            <View style={{ paddingLeft: width / 2, flexDirection: "row", alignItems: "center", padding: 10 }}>
                                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.PlusBusinessYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ PlusBusinessNo: false });
-                                            else this.setState({ PlusBusinessNo: true });
                                             this.setState({ PlusBusinessYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.PlusBusinessNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ PlusBusinessYes: false });
-                                            else this.setState({ PlusBusinessYes: true });
-                                            this.setState({ PlusBusinessNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.PlusBusinessYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
                             <View style={styles.ItemNote}>
@@ -848,33 +840,19 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                             </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
+                            <View style={{ paddingLeft: width / 2, flexDirection: "row", alignItems: "center", padding: 10 }}>
                                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.PlusOtherYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ PlusOtherNo: false });
-                                            else this.setState({ PlusOtherNo: true });
                                             this.setState({ PlusOtherYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.PlusOtherNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ PlusOtherYes: false });
-                                            else this.setState({ PlusOtherYes: true });
-                                            this.setState({ PlusOtherNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.PlusOtherYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
                             <View style={[styles.Item, { marginTop: 20, marginBottom: 10 }]}>
@@ -888,33 +866,19 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                             </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
+                            <View style={{ paddingLeft: width / 2, flexDirection: "row", alignItems: "center", padding: 10 }}>
                                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.MinusDistortedShapeYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusDistortedShapeNo: false });
-                                            else this.setState({ MinusDistortedShapeNo: true });
                                             this.setState({ MinusDistortedShapeYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.MinusDistortedShapeNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusDistortedShapeYes: false });
-                                            else this.setState({ MinusDistortedShapeYes: true });
-                                            this.setState({ MinusDistortedShapeNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.MinusDistortedShapeYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
                             <View style={styles.ItemNote}>
@@ -923,33 +887,19 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                             </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
+                            <View style={{ paddingLeft: width / 2, flexDirection: "row", alignItems: "center", padding: 10 }}>
                                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.MinusNearGraveYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusNearGraveNo: false });
-                                            else this.setState({ MinusNearGraveNo: true });
                                             this.setState({ MinusNearGraveYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.MinusNearGraveNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusNearGraveYes: false });
-                                            else this.setState({ MinusNearGraveYes: true });
-                                            this.setState({ MinusNearGraveNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.MinusNearGraveYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
                             <View style={styles.ItemNote}>
@@ -958,33 +908,19 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                             </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
+                            <View style={{ paddingLeft: width / 2, flexDirection: "row", alignItems: "center", padding: 10 }}>
                                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.MinusEntryYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusEntryNo: false });
-                                            else this.setState({ MinusEntryNo: true });
                                             this.setState({ MinusEntryYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.MinusEntryNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusEntryYes: false });
-                                            else this.setState({ MinusEntryYes: true });
-                                            this.setState({ MinusEntryNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.MinusEntryYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
                             <View style={styles.ItemNote}>
@@ -993,33 +929,19 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
                             </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
+                            <View style={{ paddingLeft: width / 2, flexDirection: "row", alignItems: "center", padding: 10 }}>
                                 <View style={{ flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.MinusOtherYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusOtherNo: false });
-                                            else this.setState({ MinusOtherNo: true });
                                             this.setState({ MinusOtherYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.MinusOtherNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusOtherYes: false });
-                                            else this.setState({ MinusOtherYes: true });
-                                            this.setState({ MinusOtherNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.MinusOtherYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
 
@@ -1096,7 +1018,7 @@ export default class QuickValuationREsScr extends Component<iProps, iState> {
                                                 <Text
                                                     style={{ color: "#1B2031", marginHorizontal: 7, marginVertical: 10 }}
                                                 >
-                                                    {this.state.QuickValuationRE.BankUnitPrice ? Utility.GetDecimalString(this.state.QuickValuationRE.TotalPrice) : ""}
+                                                    {this.state.QuickValuationRE.BankUnitPrice ? Utility.GetDecimalString(this.state.QuickValuationRE.BankUnitPrice) : ""}
                                                 </Text>
                                             </View>
                                         </View>

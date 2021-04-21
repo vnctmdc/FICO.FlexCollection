@@ -12,6 +12,8 @@ class Employee {
     public EmployeeCode?: string;
     public Description?: string;
     public Notes?: string;
+    public DeviceName?:string;
+    public IsCheckFinger?:boolean;
 
 }
 

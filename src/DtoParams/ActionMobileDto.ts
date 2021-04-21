@@ -5,11 +5,13 @@ import ProcessValuationDocumentContact from "../Entities/ProcessValuationDocumen
 import ProcessValuationRE from "../Entities/ProcessValuationRE";
 import ProcessValuationREApartment from "../Entities/ProcessValuationREApartment";
 import ProcessValuationREConstruction from "../Entities/ProcessValuationREConstruction";
+import ProcessValuationVehicle from "../Entities/ProcessValuationVehicle";
+
 
 import SystemParameter from "../Entities/SystemParameter";
 import { BaseParam } from "./BaseParam";
 
-export default class ActionDto extends BaseParam {
+export default class ActionMobileDto extends BaseParam {
 
     public ProcessValuationDocumentID?: number;
     public ProcessValuationDocument?: ProcessValuationDocument;
@@ -18,5 +20,13 @@ export default class ActionDto extends BaseParam {
     public ProcessValuationRE?: ProcessValuationRE;
     public ProcessValuationREApartment?: ProcessValuationREApartment;
     public ProcessValuationREConstruction?: ProcessValuationREConstruction;
-    
+    public LstContiguousStreetType?: SystemParameter[];
+    public SaveType? : number;
+    public LstBuildingType ?: SystemParameter[];
+    public LstConstructionType ?: SystemParameter[];
+    public ListProcessValuationREConstruction?: ProcessValuationREConstruction[];
+    public ProcessValuationVehicle?: ProcessValuationVehicle;
+    public LstCarType ?: SystemParameter[];
+    public LstUsePurpose ?: SystemParameter[]; 
+    public ListProcessValuationREApartment? : ProcessValuationREApartment[];
 }

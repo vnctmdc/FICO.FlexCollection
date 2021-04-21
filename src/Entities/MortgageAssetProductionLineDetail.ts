@@ -9,5 +9,6 @@ export default class MortgageAssetProductionLineDetail {
     public Name?: string;
     public Type?: string;
     public IsWorkfield?: boolean;
+    public IsWorkfieldName?: string;
 
 }

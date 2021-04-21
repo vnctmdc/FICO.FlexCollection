@@ -1,5 +1,5 @@
-import { StyleSheet } from "react-native";
-
+import { StyleSheet , Dimensions} from "react-native";
+const { width, height } = Dimensions.get("window");
 export default StyleSheet.create({
     TextInput: {
         borderWidth: 1,
@@ -209,4 +209,67 @@ export default StyleSheet.create({
         paddingBottom: 10,
         marginTop: 10,
     },
+    ViewGeneral: {
+        backgroundColor: "#FFFFFF",
+        marginTop: 8,
+    },
+    ViewTitle: {
+        backgroundColor: '#AE55E6',
+        paddingHorizontal: 8,
+        paddingVertical: 12,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        borderTopLeftRadius: 5,
+        borderTopRightRadius: 5,
+    },
+    ViewContent: {
+        paddingHorizontal: 8,
+        paddingVertical: 12,
+        borderBottomLeftRadius: 5,
+        borderBottomRightRadius: 5,
+        borderRightColor: "#7ba6c2",
+        borderRightWidth: 1,
+        borderLeftColor: "#7ba6c2",
+        borderLeftWidth: 1,
+        borderBottomColor: "#7ba6c2",
+        borderBottomWidth: 1,
+    },
+    ViewItemOval: {
+        width: 19,
+        height: 21,
+        borderRadius: 50,
+        backgroundColor: "#ae55e6",
+        transform: [{ scaleX: 2 }],
+        flexDirection: 'row',
+        alignSelf: 'flex-end',
+        marginRight : 30,
+    },
+    ViewContentItemFlatList: {
+        width : width-34,
+        paddingHorizontal: 2,
+        paddingVertical: 12,
+        borderBottomLeftRadius: 5,
+        borderBottomRightRadius: 5,
+        borderTopLeftRadius: 5,
+        borderTopRightRadius: 5,
+        borderRightColor: "#7ba6c2",
+        borderRightWidth: 1,
+        borderLeftColor: "#7ba6c2",
+        borderLeftWidth: 1,
+        borderBottomColor: "#7ba6c2",
+        borderBottomWidth: 1,
+        borderTopColor: "#7ba6c2",
+        borderTopWidth: 1,
+        //marginRight : 7,
+    },
+    ViewCountItemFlatList: {
+        color: "#ae55e6",
+        fontSize: 12,
+        paddingTop: 3,
+        paddingLeft: 1,
+        fontWeight: "bold",
+        height: 30,
+        alignSelf: "flex-end",
+        marginRight: 30,
+    }
 });

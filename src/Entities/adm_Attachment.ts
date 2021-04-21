@@ -15,6 +15,8 @@ class adm_Attachment {
 
     public CreatedDTG?: Date;
 
+    public CreatedDTGText?: string;
+
     public UpdatedBy?: string;
 
     public UpdatedDTG?: Date;

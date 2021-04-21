@@ -119,6 +119,7 @@ enum PromisePaid {
 }
 
 enum AttachmentRefType {
+    MortgageAsset = 1,
     ActionField = 2,
     CustomerInfo = 3,
 }
@@ -187,6 +188,7 @@ enum MortgageAssetCode2 {
     // BDS
     BatDongSan_DatO = "BatDongSan_DatO",
     BatDongSan_CaoOc = "BatDongSan_CaoOc",
+    BatDongSan_LoDatO = "BatDongSan_LoDatO",
     BatDongSan_ChungCu = "BatDongSan_ChungCu",
     BatDongSan_DuAn = "BatDongSan_DuAn",
     BatDongSan_NhaXuong = "BatDongSan_NhaXuong",
@@ -234,12 +236,43 @@ enum FeatureId {
 }
 
 enum ProcessValuationREFrontageType {
-    MatDuongPho = 0,
-    MatNgoHem = 1,
-    MatDuongNoiBo = 2
+    MatDuongPho = 1,
+    MatNgoHem = 2,
+    MatDuongNoiBo = 3
+}
+enum TransformerType{
+    Nhua = 1,
+    BeTong = 2,
+    Da = 3,
+    Gach = 4,
+    Dat = 5,
+    Thuy = 6,
+}
+
+enum SaveType {
+    // Common
+    Temporary = 1,
+    Completed = 2,
+
+    // Bao cao dinh gia
+    PVD_ValidateDoc = 1, // Kiem tra ho so (tab 1)
+    PVD_Workfield = 2, // Nhap thong tin tai san (tab 2)
+    PVD_Report = 4, // Lap bao cao (tab 3)
+}
+
+enum TypeOfConstruction{
+    ToanNhaVPTM = 1,
+    SanVP = 2,
+    KhachSan = 3,
+    ToaNhaHonHopVPVaKS = 4,
+    ToaNhaHonHopVPVaNO = 5,
+    ToaNhaHonHopKSVaNO = 6,
+    ToaNHaHonHopTMVaNO = 7,
+    Khac = 8,
 }
 
 export {
+    SaveType,
     FeatureId,
     MortgageAssetCode2,
     ValidateDocumentStatus,
@@ -267,5 +300,7 @@ export {
     AttachmentRefType,
     KyHuaTra,
     PromisePaid,
-    ProcessValuationREFrontageType
+    ProcessValuationREFrontageType,
+    TypeOfConstruction,
+    TransformerType,
 };

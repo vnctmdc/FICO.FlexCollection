@@ -6,6 +6,7 @@ class ApiUrl {
 
     // Authentication
     static Authentication_Login = EnvConfig.getApiHost() + "/api/Authentication/Login";
+    static AuthenticationFinger_Login = EnvConfig.getApiHost() + "/api/Authentication/LoginFinger";
     static Authentication_Logout = EnvConfig.getApiHost() + "/api/Authentication/Logout";
 
     //StorePriceStandardREResidential
@@ -31,6 +32,8 @@ class ApiUrl {
 
     // chart
     static Home_Chart = EnvConfig.getApiHost() + "/Chart/Home.aspx";
+
+    static PostionTracking_Execute = EnvConfig.getApiHost() + "/api/Tracking/Execute";
 
     //static PDFViewer = EnvConfig.getApiHost() + "/ProcessValuationDocumentPdfViewer.ashx";
 
@@ -72,6 +75,17 @@ class ApiUrl {
     static ProcessValuationDocument_Execute = EnvConfig.getApiHost() + "/api/ProcessValuationDocument/Execute";
     static QuickValuation_Execute = EnvConfig.getApiHost() + "/api/QuickValuation/Execute";
     static ProcessValuation_Execute = EnvConfig.getApiHost() + "/api/ProcessValuation/Execute";
+    static Action_Execute = EnvConfig.getApiHost() + "/api/Action/Execute";
+    
+
+    static RECondominium_Execute = EnvConfig.getApiHost() + "/api/RECondominium/Execute";
+    static VehicleRoad_Execute = EnvConfig.getApiHost() + "/api/VehicleRoad/Execute";
+    static Vessel_Execute = EnvConfig.getApiHost() + "/api/Vessel/Execute";
+    static Equipment_Execute = EnvConfig.getApiHost() + "/api/Equipment/Execute";
+    static BatchEquipment_Execute = EnvConfig.getApiHost() + "/api/BatchEquipment/Execute";
+    static BatchRE_Execute = EnvConfig.getApiHost() + "/api/BatchRE/Execute";
+    static WorkInEmployee_Execute = EnvConfig.getApiHost() + "/api/WorkInEmployee/Execute";
+
 }
 
 export default ApiUrl;

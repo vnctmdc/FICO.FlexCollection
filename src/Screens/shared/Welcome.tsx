@@ -64,9 +64,8 @@ export default class Welcome extends Component<any, any> {
             console.log("Start init application");
 
             let request = new GlobalDto();
-            request.DeviceInfo = `Model: ${Device.brand}\nDevice: ${
-                Device.modelName
-            }\nVersion: ${EnvConfig.getVersion()}`;
+            request.DeviceInfo = `Model: ${Device.brand}\nDevice: ${Device.modelName
+                }\nVersion: ${EnvConfig.getVersion()}`;
 
             let appInfo = await HttpUtils.post<AppInfomation>(
                 ApiUrl.Global_GetVersion_Api,
@@ -131,7 +130,7 @@ export default class Welcome extends Component<any, any> {
         //     outputRange: ["0deg", "360deg"],
         // });
         return (
-            <ImageBackground style={{ flex: 1 }} source={require("../../../assets/background.png")}>
+            <ImageBackground style={{ flex: 1 }} source={require("../../../assets/background4.jpg")}>
                 <View style={{ flexGrow: 0.35 }}>
                     <View style={{ flex: 1, justifyContent: "center" }}>
                         {/* <Animatable.View
@@ -151,7 +150,7 @@ export default class Welcome extends Component<any, any> {
                 <ActivityIndicator
                     animating={true}
                     size={"large"}
-                    color={"#568EFF"}
+                    color={"#FFFFFF"}
                     style={{
                         position: "absolute",
                         zIndex: 300000,

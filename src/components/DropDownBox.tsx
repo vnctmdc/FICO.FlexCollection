@@ -11,6 +11,7 @@ interface iProp {
     TextField?: string; // Thuộc tính chứa text của mảng
     PlaceHolder?: string; // Placeholder của dropdown
     OnSelectedItemChanged?: (item: any) => void; // Sự kiện khi change item
+    Disable?: boolean;
 }
 interface iState {
     showItemList: boolean;
@@ -24,7 +25,8 @@ export default class DropDownBox extends Component<iProp, iState> {
         this.state = {
             showItemList: false,
             selectedValue: this.props.SelectedValue ? this.props.SelectedValue.toString() : "",
-            //SelectedText: this.getSelectedText(this.props.SelectedValue)
+            //SelectedText: this.getSelectedText(this.props.SelectedValue),
+
         };
     }
 
@@ -99,6 +101,7 @@ export default class DropDownBox extends Component<iProp, iState> {
                 <View style={Theme.DropdownListInput}>
                     <TouchableOpacity
                         activeOpacity={0.5}
+                        disabled={this.props.Disable == true ? true: false}
                         onPress={() => {
                             this.showPopupItem();
                         }}

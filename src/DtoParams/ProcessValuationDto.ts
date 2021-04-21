@@ -10,6 +10,8 @@ export default class ProcessValuationDto extends BaseParam {
 
     public ProcessValuationDocumentID?: number;
 
+    public ProcessValuationEquipmentID?: number;
+
     public ProcessValuationDocument?: ProcessValuationDocument;
     
     public ProcessValuation?: ProcessValuation;
@@ -28,5 +30,7 @@ export default class ProcessValuationDto extends BaseParam {
     public ProcessValuationEquipment?: ProcessValuationEquipment;
 
     public ProcessValuationDocumentContact?: ProcessValuationDocumentContact;
+
+    public MACode2Enable?: boolean;
     
 }

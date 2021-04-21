@@ -1,5 +1,5 @@
 import React from 'react';
-import { View, TouchableOpacity, FlatList, Text, Dimensions, Alert, TextInput } from "react-native";
+import { View, TouchableOpacity, FlatList, Text, Dimensions, StyleSheet, TextInput } from "react-native";
 import Toolbar from "../../components/Toolbar";
 import FontAwesome from "react-native-vector-icons/FontAwesome";
 import AntDesign from "react-native-vector-icons/AntDesign";
@@ -45,15 +45,7 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
         this.props.GlobalStore.HoSoDangDinhGiaFilterTrigger = () => {
             this.LoadData(false);
         };
-        
-    }
 
-    async SetupForm() {
-        try {
-
-        } catch (ex) {
-            this.props.GlobalStore.Exception = ex;
-        }
     }
 
     async LoadData(isLoadMore: boolean) {
@@ -93,6 +85,78 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
     }
 
     renderItem(index: number, item: ProcessValuationDocument) {
+        
+        return (
+            <View
+                style={{
+                    borderBottomWidth: 1,
+                    borderBottomColor: "gainsboro",
+                    paddingHorizontal: 8,
+                    paddingVertical: 3
+
+                }}
+            >
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>STT </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{index + 1}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Số BCĐG </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.Code}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Loại TS cấp 1 </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.MortgageAssetCode1Name}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Cán bộ định giá </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.ValuationEmployeeName}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Chi nhánh </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.ValuationOrganizationName}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Tên khách hàng </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.CustomerName}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>TG còn lại của SLA </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.SLAPlanEnd}</Text>
+                    </View>
+                </View>
+            </View>
+        );
+    }
+
+    renderItem1(index: number, item: ProcessValuationDocument) {
         return (
             <View
                 style={{
@@ -169,16 +233,13 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
                                 this.props.navigation.navigate("HoSoFilter", {
                                     Screen: Enums.FeatureId.HoSoDangDinhGia,
                                 });
-                                //this.props.navigation.navigate('KeHoachVisitNgayMap');
                             }}
                         >
                             <AntDesign name="search1" size={25} color="#FFFFFF" />
                         </TouchableOpacity>
                     </View>
                 </Toolbar>
-                <View>
 
-                </View>
                 <FlatList
                     data={this.state.LstPVDocument}
                     //data={this.state.LstAction.filter((x) =>
@@ -210,3 +271,25 @@ export default class DSHoSoDangDinhGiaSrc extends React.Component<iProps, iState
     }
 
 }
+
+const styles = StyleSheet.create({
+    Item: {
+        flexDirection: "row",
+        paddingVertical: 4,
+        alignItems: "center",
+        justifyContent: "space-between",
+    },
+    Item123: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        borderBottomColor: "gainsboro",
+        borderBottomWidth: 1,
+    },
+    ItemNote: {
+        flexDirection: "row",
+        paddingVertical: 8,
+    },
+    TextAndDrop: {
+        marginTop: 10,
+    },
+});

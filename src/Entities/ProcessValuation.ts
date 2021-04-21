@@ -1,3 +1,5 @@
+import MortgageAssetProductionLineDetail from "./MortgageAssetProductionLineDetail";
+
 export default class ProcessValuation{
     public ProcessValuationID?: number;
     
@@ -43,6 +45,16 @@ export default class ProcessValuation{
 
     public Coordinate?: string;
 
+    public InfactAddress?: string;
 
+    public UsePurposeDetail?: string;
+
+    public ListMortgageAssetProductionLineDetail?: MortgageAssetProductionLineDetail[];
+
+    public ContiguousStreetType?: number;
+
+    public OnLandDescription?: string;
+
+    public PositionDescription?: string;
     
 }

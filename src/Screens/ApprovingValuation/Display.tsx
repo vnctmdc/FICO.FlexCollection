@@ -43,6 +43,7 @@ import adm_Attachment from "../../Entities/adm_Attachment";
 import AttachmentDto from "../../DtoParams/AttachmentDto";
 import ImageViewer from "react-native-image-zoom-viewer";
 import ReportGeneratorCommand from "../../Entities/ReportGeneratorCommand";
+import Employee from "../../Entities/Employee";
 
 const { width, height } = Dimensions.get("window");
 
@@ -59,11 +60,13 @@ interface iState {
     showConfirmReject: boolean;
     CommentApprove: string;
     CommentReject: string;
-    PVDID?: number;
     LstAttachment?: adm_Attachment[];
     SelectedFullScreen: adm_Attachment;
     ReportGeneratorCommand?: ReportGeneratorCommand;
     Attachment?: adm_Attachment;
+    showApprovalAuthority: boolean;
+    LstEmployee?: Employee[];
+    EmployeeID?: number;
 }
 
 @inject(SMX.StoreName.GlobalStore)
@@ -79,6 +82,8 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
             CommentReject: '',
             LstAttachment: [],
             SelectedFullScreen: null,
+            showApprovalAuthority: false,
+            LstEmployee: []
         };
     }
     async componentDidMount() {
@@ -103,16 +108,13 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                 JSON.stringify(req)
             );
 
-            console.log(123, res!.Attachment!);
-            
-
             if (res) {
                 this.setState({
                     ProcessValuationDocument: res!.ProcessValuationDocument!,
                     LstAttachment: res!.LstAttachment!,
                     Attachment: res!.Attachment!
-                    
-                })
+
+                });
             }
 
             this.props.GlobalStore.HideLoading();
@@ -135,18 +137,21 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                 return;
             }
             req.CommentApprove = this.state.CommentApprove;
-            req.PVDID = this.state.PVDID;
+            req.PVDID = this.props.route.params.ProcessValuationDocumentID;
 
-            let res = await HttpUtils.post<ProcessValuationDocumentDto>(
+            await HttpUtils.post<ProcessValuationDocumentDto>(
                 ApiUrl.ProcessValuationDocument_Execute,
                 SMX.ApiActionCode.Approve,
                 JSON.stringify(req)
             );
 
             this.props.GlobalStore.HideLoading();
+
             let mess = "Phê duyệt thành công!";
             this.props.GlobalStore.Exception = ClientMessage(mess);
+            this.props.GlobalStore.ApprovingValuationFilterTrigger();
 
+            this.props.navigation.goBack();
         } catch (ex) {
             this.props.GlobalStore.HideLoading();
             this.props.GlobalStore.Exception = ex;
@@ -165,19 +170,22 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                 this.props.GlobalStore.Exception = ClientMessage(message);
                 return;
             }
-            req.CommentReject = this.state.CommentReject;
-            req.PVDID = this.state.PVDID;
+            req.CommentApprove = this.state.CommentReject;
+            req.PVDID = this.props.route.params.ProcessValuationDocumentID;
 
-            let res = await HttpUtils.post<ProcessValuationDocumentDto>(
+            await HttpUtils.post<ProcessValuationDocumentDto>(
                 ApiUrl.ProcessValuationDocument_Execute,
                 SMX.ApiActionCode.Reject,
                 JSON.stringify(req)
             );
 
-            this.setState({});
-
             this.props.GlobalStore.HideLoading();
 
+            let mess = "Từ chối thành công!";
+            this.props.GlobalStore.Exception = ClientMessage(mess);
+            this.props.GlobalStore.ApprovingValuationFilterTrigger();
+
+            this.props.navigation.goBack();
         } catch (ex) {
             this.props.GlobalStore.HideLoading();
             this.props.GlobalStore.Exception = ex;
@@ -185,25 +193,62 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
         }
     }
 
-    showConfirmApprove = () => {
-        this.setState({ showConfirmApprove: !this.state.showConfirmApprove });
-    };
+    async onGetListEmployee() {
+        try {
+            this.props.GlobalStore.ShowLoading();
+            var req = new ProcessValuationDocumentDto();
+            req.PVDID = this.props.route.params.ProcessValuationDocumentID;
 
-    showConfirmReject = () => {
-        this.setState({ showConfirmReject: !this.state.showConfirmReject });
-    };
+            var res = await HttpUtils.post<ProcessValuationDocumentDto>(
+                ApiUrl.ProcessValuationDocument_Execute,
+                SMX.ApiActionCode.GetListEmployee,
+                JSON.stringify(req)
+            );
 
-    checkIsNotImage(img: adm_Attachment) {
-        let result = false;
-        if (img.FileName && img.FileName !== null && img.FileName !== "") {
-            let ext = img.FileName.split(".");
-            if (ext && ext.length > 0 && (ext[1] === "pdf" || ext[1] === "xlsx" || ext[1] === "docx")) {
-                result = true;
-                return result;
-            }
+            this.setState({
+                LstEmployee: res!.LstEmployee!,
+                showApprovalAuthority: res!.showApprovalAuthority
+            });
+
+            this.props.GlobalStore.HideLoading();
+        } catch (ex) {
+            this.props.GlobalStore.HideLoading();
+            this.props.GlobalStore.Exception = ex;
         }
+    }
 
-        return false;
+    async onApprovalManuallyPVDOK() {
+        try {
+            this.props.GlobalStore.ShowLoading();
+            var req = new ProcessValuationDocumentDto();
+
+            if (!this.state.EmployeeID == undefined || this.state.EmployeeID == null) {
+                this.props.GlobalStore.HideLoading();
+                let message = "Bạn chưa chọn cán bộ ủy quyền";
+                this.props.GlobalStore.Exception = ClientMessage(message);
+                return;
+            }
+            req.EmployeeID = this.state.EmployeeID;
+            req.PVDID = this.props.route.params.ProcessValuationDocumentID;
+
+            await HttpUtils.post<ProcessValuationDocumentDto>(
+                ApiUrl.ProcessValuationDocument_Execute,
+                SMX.ApiActionCode.ApprovalManuallyPVD,
+                JSON.stringify(req)
+            );
+
+            this.props.GlobalStore.HideLoading();
+
+            let mess = "Thực hiện thành công!";
+            this.props.GlobalStore.Exception = ClientMessage(mess);
+            this.props.GlobalStore.ApprovingValuationFilterTrigger();
+
+            this.props.navigation.goBack();
+        } catch (ex) {
+            this.props.GlobalStore.HideLoading();
+            this.props.GlobalStore.Exception = ex;
+
+        }
     }
 
     async btn_GetImageByECMID(image: adm_Attachment) {
@@ -228,29 +273,47 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
         }
     }
 
+    showConfirmApprove = () => {
+        this.setState({ showConfirmApprove: !this.state.showConfirmApprove });
+    };
+
+    showConfirmReject = () => {
+        this.setState({ showConfirmReject: !this.state.showConfirmReject });
+    };
+
+    showApprovalAuthority = () => {
+        this.setState({ showApprovalAuthority: !this.state.showApprovalAuthority });
+    }
+
+    checkIsNotImage(img: adm_Attachment) {
+        let result = false;
+        if (img.FileName && img.FileName !== null && img.FileName !== "") {
+            let ext = img.FileName.split(".");
+            if (ext && ext.length > 0 && (ext[1] === "pdf" || ext[1] === "xlsx" || ext[1] === "docx")) {
+                result = true;
+                return result;
+            }
+        }
+
+        return false;
+    }
+
     render() {
         let pvd = this.state.ProcessValuationDocument;
         let att = this.state.Attachment;
         return (
-            <View style={{ height: height, backgroundColor: "#F6F6FE" }}>
+            <View style={{ flex: 1, height: height, backgroundColor: "#F6F6FE" }}>
                 <Toolbar Title="Phê duyệt BCĐG" navigation={this.props.navigation} />
                 <KeyboardAvoidingView behavior="height" style={{ flex: 1, paddingHorizontal: 8 }}>
-                    <ScrollView showsVerticalScrollIndicator={false} >
-                        <View style={{ backgroundColor: '#FFFFFF', borderRadius: 5, borderColor: '#7ba6c2', borderWidth: 1, marginTop: 15, paddingHorizontal: 8, paddingVertical: 12 }}>
-                            <View style={{ marginBottom: 3, flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Text style={{ fontSize: 15, fontWeight: "700" }}>
-                                        I. THÔNG TIN CHUNG
-                                    </Text>
-                                </View>
+                    <ScrollView showsVerticalScrollIndicator={false}>
+
+                        <View style={Theme.ViewGeneral}>
+                            <View style={Theme.ViewTitle}>
+                                <Text style={{ fontSize: 15, fontWeight: "600", color: '#FFFFFF' }}>
+                                    I. THÔNG TIN CHUNG
+                                </Text>
                             </View>
-                            <View
-                                style={{
-                                    height: 1,
-                                    backgroundColor: "#7ba6c2",
-                                }}
-                            ></View>
-                            <View style={{ marginTop: 8, marginBottom: 10 }}>
+                            <View style={Theme.ViewContent}>
                                 <View style={styles.Item}>
                                     <View style={{ flex: 2, flexDirection: 'row', justifyContent: 'space-between' }}>
                                         <Text >Tên KH: </Text>
@@ -266,7 +329,7 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                                 />
                                 <View style={styles.Item}>
                                     <View style={{ flex: 2, flexDirection: 'row', justifyContent: 'space-between' }}>
-                                        <Text >Mã BCĐG: </Text>
+                                        <Text >Số BCĐG: </Text>
                                         <Text style={{ fontWeight: '600' }}>{pvd.Code}</Text>
                                     </View>
                                 </View>
@@ -325,33 +388,35 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                             </View>
                         </View>
 
-                        <View style={{ backgroundColor: '#FFFFFF', borderRadius: 5, borderColor: '#7ba6c2', borderWidth: 1, marginTop: 15, paddingHorizontal: 8, paddingVertical: 12 }}>
-                            <View style={{ marginBottom: 3, flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Text style={{ fontSize: 15, fontWeight: "700" }}>
-                                        II. BÁO CÁO ĐỊNH GIÁ
-                                    </Text>
-                                </View>
+                        <View style={Theme.ViewGeneral}>
+                            <View style={Theme.ViewTitle}>
+                                <Text style={{ fontSize: 15, fontWeight: "600", color: '#FFFFFF' }}>
+                                    II. BÁO CÁO ĐỊNH GIÁ
+                                </Text>
                             </View>
-                            <View
-                                style={{
-                                    height: 1,
-                                    backgroundColor: "#7ba6c2",
-                                }}
-                            />
-                            <View style={{ marginTop: 8, marginBottom: 10 }}>
+                            <View style={Theme.ViewContent}>
                                 <View style={styles.Item}>
                                     <View style={{ flex: 3, flexDirection: 'row', justifyContent: 'space-between' }}>
                                         <Text >Bản PDF BCĐG </Text>
                                     </View>
                                     <TouchableOpacity
                                         style={{ flex: 2, flexDirection: 'row', justifyContent: 'center' }}
+                                        activeOpacity={.3}
                                         onPress={() => {
-                                            this.props.navigation.navigate("PDFView", {
-                                                AttachmentID: att.AttachmentID,
-                                                ECMItemID: att.ECMItemID,
-                                                FileName: att.FileName,
-                                            });
+                                            if (att == undefined) {
+                                                this.props.GlobalStore.Exception = ClientMessage("Tải file lỗi. Liên hệ với admin để được hỗ trợ");
+                                                return;
+                                            }
+                                            if (att.AttachmentID != undefined || att.AttachmentID != null) {
+                                                this.props.navigation.navigate("PDFView", {
+                                                    AttachmentID: att.AttachmentID,
+                                                    ECMItemID: att.ECMItemID,
+                                                    FileName: att.FileName,
+                                                });
+                                            } else {
+                                                this.props.GlobalStore.Exception = ClientMessage("Tải file lỗi. Liên hệ với admin để được hỗ trợ");
+                                                return;
+                                            }
                                         }}
                                     >
                                         <Text style={{ fontWeight: '400', color: '#3388cc', fontSize: 17 }}>Xem </Text>
@@ -364,133 +429,175 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                                         marginVertical: 8,
                                     }}
                                 />
-                            </View>
-                            <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
-                                <TouchableOpacity
-                                    style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}
-                                    onPress={() => {
-                                        this.setState({ showConfirmApprove: true });
-                                    }}
-                                >
-                                    <LinearGradient
-                                        colors={["#F07700", "#F07700"]}
-                                        style={{
-                                            width: width / 3,
-                                            height: 40,
-                                            backgroundColor: "#007AFF",
-                                            borderRadius: 5,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            flexDirection: 'row',
-
+                                <View style={{ justifyContent: 'center', flexDirection: 'row' }}>
+                                    <TouchableOpacity
+                                        style={{ justifyContent: 'flex-end', alignItems: 'flex-end' }}
+                                        onPress={() => {
+                                            this.props.navigation.navigate("PreLiminareQuote", {
+                                                ProcessValuationDocumentID: this.props.route.params.ProcessValuationDocumentID,
+                                            });
                                         }}
                                     >
-                                        <FontAwesome5 name="check-circle" size={18} color={"#FFFFFF"} />
-                                        <Text style={{ color: '#FFFFFF', fontSize: 15, marginLeft: 8 }}>Phê duyệt</Text>
-                                    </LinearGradient>
-                                </TouchableOpacity>
-                                <TouchableOpacity
-                                    style={{ marginLeft: 10, justifyContent: 'flex-end', alignItems: 'flex-end' }}
-                                    onPress={() => {
-                                        this.setState({ showConfirmReject: true });
-                                    }}
-                                >
-                                    <LinearGradient
-                                        colors={["#F07700", "#F07700"]}
-                                        style={{
-                                            width: width / 3,
-                                            height: 40,
-                                            backgroundColor: "#007AFF",
-                                            borderRadius: 5,
-                                            justifyContent: "center",
-                                            alignItems: "center",
-                                            flexDirection: 'row',
+                                        <LinearGradient
+                                            colors={SMX.BtnColor}
+                                            style={{
+                                                width: width / 4 - 25,
+                                                height: 35,
+                                                backgroundColor: "#007AFF",
+                                                borderRadius: 5,
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                flexDirection: 'row',
 
+                                            }}
+                                        >
+                                            {/* <FontAwesome5 name="check-circle" size={18} color={"#FFFFFF"} /> */}
+                                            <Text style={{ color: '#FFFFFF', fontSize: 15, marginLeft: 8 }}>Báo giá</Text>
+                                        </LinearGradient>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={{ marginLeft: 10, justifyContent: 'flex-end', alignItems: 'flex-end' }}
+                                        onPress={() => {
+                                            this.setState({ showConfirmApprove: true });
                                         }}
                                     >
-                                        <FontAwesome5 name="times-circle" size={18} color={"#FFFFFF"} />
-                                        <Text style={{ color: '#FFFFFF', fontSize: 15, marginLeft: 8 }}>Từ chối</Text>
-                                    </LinearGradient>
-                                </TouchableOpacity>
-                            </View>
-                        </View>
+                                        <LinearGradient
+                                            colors={SMX.BtnColor}
+                                            style={{
+                                                width: width / 4 - 10,
+                                                height: 35,
+                                                backgroundColor: "#007AFF",
+                                                borderRadius: 5,
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                flexDirection: 'row',
 
-                        <View style={{ backgroundColor: '#FFFFFF', borderRadius: 5, borderColor: '#7ba6c2', borderWidth: 1, marginVertical: 15, paddingHorizontal: 8, paddingVertical: 12 }}>
-                            <View style={{ marginBottom: 3, flexDirection: 'row', justifyContent: 'space-between' }}>
-                                <View style={{ flexDirection: 'row' }}>
-                                    <Text style={{ fontSize: 15, fontWeight: "700" }}>
-                                        III. DANH SÁCH TÀI LIỆU
-                                    </Text>
+                                            }}
+                                        >
+                                            {/* <FontAwesome5 name="check-circle" size={18} color={"#FFFFFF"} /> */}
+                                            <Text style={{ color: '#FFFFFF', fontSize: 15 }}>Phê duyệt</Text>
+                                        </LinearGradient>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={{ marginLeft: 10, justifyContent: 'flex-end', alignItems: 'flex-end' }}
+                                        onPress={() => {
+                                            this.setState({ showConfirmReject: true });
+                                        }}
+                                    >
+                                        <LinearGradient
+                                            colors={SMX.BtnColor}
+                                            style={{
+                                                width: width / 4 - 25,
+                                                height: 35,
+                                                backgroundColor: "#007AFF",
+                                                borderRadius: 5,
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                flexDirection: 'row',
+
+                                            }}
+                                        >
+                                            {/* <FontAwesome5 name="times-circle" size={18} color={"#FFFFFF"} /> */}
+                                            <Text style={{ color: '#FFFFFF', fontSize: 15 }}>Từ chối</Text>
+                                        </LinearGradient>
+                                    </TouchableOpacity>
+                                    <TouchableOpacity
+                                        style={{ marginLeft: 10, justifyContent: 'flex-end', alignItems: 'flex-end' }}
+                                        onPress={() => { this.onGetListEmployee(); }}
+                                    >
+                                        <LinearGradient
+                                            colors={SMX.BtnColor}
+                                            style={{
+                                                width: width / 4 - 20,
+                                                height: 35,
+                                                backgroundColor: "#007AFF",
+                                                borderRadius: 5,
+                                                justifyContent: "center",
+                                                alignItems: "center",
+                                                flexDirection: 'row',
+
+                                            }}
+                                        >
+                                            {/* <FontAwesome5 name="times-circle" size={18} color={"#FFFFFF"} /> */}
+                                            <Text style={{ color: '#FFFFFF', fontSize: 15 }}>Ủy quyền</Text>
+                                        </LinearGradient>
+                                    </TouchableOpacity>
                                 </View>
                             </View>
-                            <View
-                                style={{
-                                    height: 1,
-                                    backgroundColor: "#7ba6c2",
-                                }}
-                            />
-                            <View>
-                                <ScrollView style={{ height: this.state.LstAttachment.length > 0 ? (this.state.LstAttachment.length > 1 ? 200 : 100) : undefined }}>
-                                    {
-                                        this.state.LstAttachment.map((data) => {
-                                            return (
-                                                <TouchableOpacity
-                                                    style={{
-                                                        width: "100%",
-                                                        marginTop: 0,
-                                                        borderBottomWidth: 1,
-                                                        borderColor: "gainsboro",
-                                                        paddingBottom: 0,
-                                                        backgroundColor: '#FFF'
-                                                    }}
-                                                    onPress={() => {
-                                                        if (!this.checkIsNotImage(data)) {
-                                                            this.btn_GetImageByECMID(data);
+                        </View>
 
-                                                            //this.setState({ SelectedFullScreen: data });
-                                                        } else {
-                                                            this.props.navigation.navigate("PDFView", {
-                                                                AttachmentID: data.AttachmentID,
-                                                                ECMItemID: data.ECMItemID,
-                                                                FileName: data.FileName,
-                                                            });
-                                                        }
-                                                    }}
-                                                >
-                                                    <View style={{ width: width - 95, padding: 10 }}>
-                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
-                                                            <Text style={{ fontWeight: "600" }}>Loại tài liệu: </Text>
-                                                            <Text style={{ fontWeight: "600", color: '#005599' }}>
-                                                                {data.DocumentTypeName}
-                                                            </Text>
-                                                        </View>
-                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
-                                                            <Text style={{ fontWeight: "600" }}>Mức độ yêu cầu: </Text>
-                                                            <Text style={{}}>{Utility.GetDictionaryValue(SMX.MapDocumentRequireStatus.dtcMapDocumentTypeStatus, data.RequireLevel)}</Text>
-                                                        </View>
-                                                        <View style={{ flexDirection: "row", marginBottom: 2 }}>
-                                                            <Text style={{ fontWeight: "600" }}>Ngày đưa lên: </Text>
-                                                            <Text style={{}}>{Utility.GetDateMinuteString(data.CreatedDTG)}</Text>
-                                                        </View>
-                                                        <View style={{ flexDirection: "row", }}>
-                                                            <Text style={{ fontWeight: "600" }}>Người đưa lên: </Text>
-                                                            <Text style={{ width: width - 100 }}>{data.FullNameCreateBy}</Text>
-                                                        </View>
-                                                    </View>
+                        <View style={[Theme.ViewGeneral, { marginBottom: 8 }]}>
+                            <View style={Theme.ViewTitle}>
+                                <Text style={{ fontSize: 15, fontWeight: "600", color: '#FFFFFF' }}>
+                                    III. DANH SÁCH TÀI LIỆU
+                                </Text>
+                            </View>
+                            <View style={Theme.ViewContent}>
+                                <>
+                                    <ScrollView style={{ height: this.state.LstAttachment.length > 0 ? (this.state.LstAttachment.length > 1 ? 200 : 100) : undefined }}>
+                                        {
+                                            this.state.LstAttachment.map((data) => {
+                                                return (
+                                                    <TouchableOpacity
+                                                        style={{
+                                                            width: "100%",
+                                                            marginTop: 0,
+                                                            borderBottomWidth: 1,
+                                                            borderColor: "gainsboro",
+                                                            paddingBottom: 0,
+                                                            backgroundColor: '#FFF'
+                                                        }}
+                                                        onPress={() => {
+                                                            if (!this.checkIsNotImage(data)) {
+                                                                this.btn_GetImageByECMID(data);
 
-                                                </TouchableOpacity>
-                                            )
-                                        })
-                                    }
-                                </ScrollView>
+                                                                //this.setState({ SelectedFullScreen: data });
+                                                            } else {
+                                                                this.props.navigation.navigate("PDFView", {
+                                                                    AttachmentID: data.AttachmentID,
+                                                                    ECMItemID: data.ECMItemID,
+                                                                    FileName: data.FileName,
+                                                                });
+                                                            }
+                                                        }}
+                                                    >
+                                                        <View style={{ width: width - 95, padding: 10 }}>
+                                                            <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                                <Text style={{ fontWeight: "600" }}>Loại tài liệu: </Text>
+                                                                <Text style={{ fontWeight: "600", color: '#005599' }}>
+                                                                    {data.DocumentTypeName}
+                                                                </Text>
+                                                            </View>
+                                                            <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                                <Text style={{ fontWeight: "600" }}>Mức độ yêu cầu: </Text>
+                                                                <Text style={{}}>{Utility.GetDictionaryValue(SMX.MapDocumentRequireStatus.dtcMapDocumentTypeStatus, data.RequireLevel)}</Text>
+                                                            </View>
+                                                            <View style={{ flexDirection: "row", marginBottom: 2 }}>
+                                                                <Text style={{ fontWeight: "600" }}>Ngày đưa lên: </Text>
+                                                                <Text style={{}}>{data.CreatedDTGText}</Text>
+                                                            </View>
+                                                            <View style={{ flexDirection: "row", }}>
+                                                                <Text style={{ fontWeight: "600" }}>Người đưa lên: </Text>
+                                                                <Text style={{ width: width - 100 }}>{data.FullNameCreateBy}</Text>
+                                                            </View>
+                                                        </View>
+
+                                                    </TouchableOpacity>
+                                                )
+                                            })
+                                        }
+                                    </ScrollView>
+                                </>
                             </View>
                         </View>
-                    </ScrollView>
-                </KeyboardAvoidingView >
 
-                {this.state.SelectedFullScreen != null ? (
-                    <Modal visible={true}>
-                        {/* <Image
+                    </ScrollView>
+                </KeyboardAvoidingView>
+
+                {
+                    this.state.SelectedFullScreen != null ? (
+                        <Modal visible={true}>
+                            {/* <Image
                             source={{
                                 uri: 'data:image/png;base64,' + this.state.SelectedFullScreen.FileContent
                                 //uri:                                    
@@ -499,16 +606,16 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                             }}
                             style={{ width: width, height: height, resizeMode: "contain" }}
                         /> */}
-                        <ImageViewer
-                            imageUrls={[
-                                {
-                                    url: 'data:image/png;base64,' + this.state.SelectedFullScreen.FileContent
-                                },
-                            ]}
-                            backgroundColor={"white"}
-                            renderIndicator={() => null}
-                        />
-                        {/* <ImageViewer
+                            <ImageViewer
+                                imageUrls={[
+                                    {
+                                        url: 'data:image/png;base64,' + this.state.SelectedFullScreen.FileContent
+                                    },
+                                ]}
+                                backgroundColor={"white"}
+                                renderIndicator={() => null}
+                            />
+                            {/* <ImageViewer
                             imageUrls={[
                                 {
                                     url: `${ApiUrl.Attachment_ImagePreview}?id=${this.state.SelectedFullScreen.AttachmentID}&ecm=${this.state.SelectedFullScreen.ECMItemID}&name=${this.state.SelectedFullScreen.FileName}&size=0&token=${GlobalCache.UserToken}`,
@@ -517,38 +624,38 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                             backgroundColor={"white"}
                             renderIndicator={() => null}
                         /> */}
-                        <View
-                            style={{
-                                position: "absolute",
-                                zIndex: 999999999,
-                                justifyContent: "space-around",
-                                alignItems: "center",
-                                flexDirection: "row",
-                                marginTop: 30,
-                            }}
-                        >
-                            <TouchableOpacity
-                                //@ts-ignore
+                            <View
                                 style={{
+                                    position: "absolute",
+                                    zIndex: 999999999,
                                     justifyContent: "space-around",
                                     alignItems: "center",
-                                    backgroundColor: "#7B35BB",
-                                    //backgroundColor: "rgba(0, 0, 0, 0.5)",
-                                    height: 40,
-                                    marginLeft: 15,
-                                    padding: 10,
-                                    borderRadius: 50,
+                                    flexDirection: "row",
+                                    marginTop: 30,
                                 }}
-                                onPress={() => this.setState({ SelectedFullScreen: null })}
                             >
-                                <View style={{ flexDirection: "row", alignItems: "center" }}>
-                                    <FontAwesome5 name="arrow-left" size={20} color={"white"} />
-                                    <Text style={{ fontWeight: "bold", fontSize: 15, marginLeft: 15, color: "white" }}>
-                                        Back
+                                <TouchableOpacity
+                                    //@ts-ignore
+                                    style={{
+                                        justifyContent: "space-around",
+                                        alignItems: "center",
+                                        backgroundColor: "#7B35BB",
+                                        //backgroundColor: "rgba(0, 0, 0, 0.5)",
+                                        height: 40,
+                                        marginLeft: 15,
+                                        padding: 10,
+                                        borderRadius: 50,
+                                    }}
+                                    onPress={() => this.setState({ SelectedFullScreen: null })}
+                                >
+                                    <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                        <FontAwesome5 name="arrow-left" size={20} color={"white"} />
+                                        <Text style={{ fontWeight: "bold", fontSize: 15, marginLeft: 15, color: "white" }}>
+                                            Back
                                     </Text>
-                                </View>
-                            </TouchableOpacity>
-                            {/* {this.props.allowEdit != null && this.props.allowEdit ? (
+                                    </View>
+                                </TouchableOpacity>
+                                {/* {this.props.allowEdit != null && this.props.allowEdit ? (
                                 <TouchableOpacity
                                     //@ts-ignore
                                     style={{
@@ -599,9 +706,10 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                                     </View>
                                 </TouchableOpacity>
                             ) : undefined} */}
-                        </View>
-                    </Modal>
-                ) : undefined}
+                            </View>
+                        </Modal>
+                    ) : undefined
+                }
 
                 <PopupModalUpdateNote
                     resetState={this.showConfirmApprove}
@@ -634,7 +742,7 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                             <LinearGradient
                                 colors={["#7B35BB", "#5D2E86"]}
                                 style={{
-                                    //width: 80,
+                                    width: width / 4,
                                     backgroundColor: "#722ED1",
                                     padding: 10,
                                     justifyContent: "center",
@@ -695,14 +803,14 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                         <TouchableOpacity
                             onPress={() => {
                                 this.setState({ showConfirmReject: false }, async () => {
-                                    await this.onApproval();
+                                    await this.onReject();
                                 });
                             }}
                         >
                             <LinearGradient
                                 colors={["#7B35BB", "#5D2E86"]}
                                 style={{
-                                    //width: 80,
+                                    width: width / 4,
                                     backgroundColor: "#722ED1",
                                     padding: 10,
                                     justifyContent: "center",
@@ -713,7 +821,7 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                                 }}
                             >
                                 <Text style={Theme.BtnTextGradient}>
-                                    Phê duyệt
+                                    Từ chối
                                 </Text>
                             </LinearGradient>
                         </TouchableOpacity>
@@ -738,6 +846,85 @@ export default class BCDGChoDuyetSrc extends Component<iProps, iState> {
                         </TouchableOpacity>
                     </View>
                 </PopupModalUpdateNote>
+
+                <PopupModalUpdateNote
+                    resetState={this.showApprovalAuthority}
+                    modalVisible={this.state.showApprovalAuthority}
+                    title="Ủy quyền phê duyệt"
+                >
+                    <View style={styles.TextAndDrop}>
+                        <View
+                            style={{ flex: 2, marginBottom: 3, flexDirection: "row" }}
+                        >
+                            <Text>Người được ủy quyền </Text>
+                        </View>
+                        <View style={{ flex: 3 }}>
+                            <DropDownBox
+                                TextField="Name"
+                                ValueField="EmployeeID"
+                                DataSource={this.state.LstEmployee}
+                                SelectedValue={this.state.EmployeeID}
+                                OnSelectedItemChanged={(item) => {
+                                    this.setState({ EmployeeID: item.EmployeeID });
+                                }}
+                            />
+                        </View>
+                    </View>
+                    <View
+                        style={{
+                            height: 1,
+                            backgroundColor: "#F0F0F4",
+                            marginVertical: 8,
+                        }}
+                    />
+                    <View style={{ marginTop: 10, flexDirection: "row", justifyContent: "flex-end" }}>
+                        <TouchableOpacity
+                            onPress={() => {
+                                this.setState({ showApprovalAuthority: false }, async () => {
+                                    await this.onApprovalManuallyPVDOK();
+                                });
+                            }}
+                        >
+                            <LinearGradient
+                                colors={["#7B35BB", "#5D2E86"]}
+                                style={{
+                                    width: width / 5,
+                                    backgroundColor: "#722ED1",
+                                    padding: 10,
+                                    justifyContent: "center",
+                                    alignItems: "center",
+                                    borderRadius: 5,
+                                    alignSelf: "center",
+                                    marginRight: 5,
+                                }}
+                            >
+                                <Text style={Theme.BtnTextGradient}>
+                                    Lưu
+                                </Text>
+                            </LinearGradient>
+                        </TouchableOpacity>
+                        <TouchableOpacity
+                            style={{
+                                width: width / 5,
+                                backgroundColor: "#E6E9EE",
+                                padding: 10,
+                                justifyContent: "center",
+                                alignItems: "center",
+                                borderRadius: 5,
+                                alignSelf: "center",
+                                marginLeft: 5,
+                            }}
+                            onPress={() => {
+                                this.setState({ showApprovalAuthority: false });
+                            }}
+                        >
+                            <Text style={{ color: "#1B2031", fontSize: 15 }}>
+                                Hủy
+                            </Text>
+                        </TouchableOpacity>
+                    </View>
+                </PopupModalUpdateNote>
+
             </View >
         )
     }

@@ -26,6 +26,7 @@ export default class ProcessValuationDocument{
     public WorkfieldContactDTG?: Date;
     public WorkfieldContactResult?: number;
     public WorkfieldPlanDTG?: Date;
+    public WorkfieldPlanDTGText?: string;
     public WorkfieldActualStartDTG?: Date;
     public WorkfieldActualEndDTG?: Date;
     public WorkfieldDistance?: number;
@@ -43,4 +44,6 @@ export default class ProcessValuationDocument{
     public SLAPlanEnd?: string;
     public Version?: number;
     public MortgagedDescription?: string;
+    public ReportType?: number;
+    
 }

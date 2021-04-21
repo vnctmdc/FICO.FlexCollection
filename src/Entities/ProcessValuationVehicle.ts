@@ -21,6 +21,7 @@ export default class ProcessValuationVehicle {
     public CarTypeName?: string;
     public WorkfieldDistance?: number;
     public Description?: string;
+    public PVDStatus?: number;
 
 
 

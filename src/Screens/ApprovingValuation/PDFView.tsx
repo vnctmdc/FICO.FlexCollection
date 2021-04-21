@@ -32,18 +32,17 @@ export default class PDFView extends React.Component<iProps, iState> {
         // console.log(3, this.props.route.params.FileName);
         // console.log(4, GlobalCache.UserToken);
 
-        //console.log(111, `${ApiUrl.Attachment_PDFView}?id=${this.props.route.params.AttachmentID}&ecm=${this.props.route.params.ECMItemID}&size=1&token=${GlobalCache.UserToken}`);
-        
+        //console.log(`${ApiUrl.Attachment_PDFView}?id=${this.props.route.params.AttachmentID}&ecm=${this.props.route.params.ECMItemID}&name=${this.props.route.params.FileName}&size=1&token=${GlobalCache.UserToken}`);
         
         // console.log(
         //     `https://drive.google.com/viewerng/viewer?embedded=true&url=${ApiUrl.Attachment_PDFView}?id=${this.props.route.params.AttachmentID}&ecm=${this.props.route.params.ECMItemID}&name=${this.props.route.params.FileName}&size=1&token=${GlobalCache.UserToken}`
         // );
         return (
             <View style={{ flex: 1, backgroundColor: "#FFFFFF" }}>
-                <Toolbar Title="Báo cáo định giá" navigation={this.props.navigation}></Toolbar>
+                <Toolbar Title={ this.props.route.params.Title != null? this.props.route.params.Title : "Báo cáo định giá"} navigation={this.props.navigation}></Toolbar>
                 <View
                     style={{
-                        paddingHorizontal: 15,
+                        //paddingHorizontal: 10,
                         flex: 1,
                         backgroundColor: "#F6F6FE",
                         borderTopLeftRadius: 20,

@@ -1,3 +1,5 @@
+import adm_Attachment from "./adm_Attachment";
+
 export default class ProcessValuationREConstruction {
     public ProcessValuationREConstructionID?: number;
     public ProcessValuationREID?: number;
@@ -8,6 +10,7 @@ export default class ProcessValuationREConstruction {
     public ConstructionType?: number;
     public Name?: string;
     public ConstructionTypeName?: string;
+    public ListAttachmentImage ?: adm_Attachment[];
 
 
 }

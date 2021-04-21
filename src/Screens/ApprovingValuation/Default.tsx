@@ -52,14 +52,6 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
 
     }
 
-    async SetupForm() {
-        try {
-
-        } catch (ex) {
-            this.props.GlobalStore.Exception = ex;
-        }
-    }
-
     async LoadData(isLoadMore: boolean) {
         try {
             this.props.GlobalStore.ShowLoading();
@@ -97,6 +89,91 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
     }
 
     renderItem(index: number, item: ProcessValuationDocument) {
+        
+        return (
+            <TouchableOpacity
+                style={{
+                    borderBottomWidth: 1,
+                    borderBottomColor: "gainsboro",
+                    paddingHorizontal: 8,
+                    paddingVertical: 3
+
+                }}
+                onPress={() => {
+                    this.props.navigation.navigate("BCDGChoDuyet", {
+                        ProcessValuationDocumentID: item.ProcessValuationDocumentID
+                    });
+                }}
+            >
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>STT </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{index + 1}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Số BCĐG </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.Code}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Loại TS cấp 1 </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.MortgageAssetCode1Name}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Cán bộ định giá </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.ValuationEmployeeName}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Chi nhánh </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.ValuationOrganizationName}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Tên khách hàng </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.CustomerName}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>Giá trị định giá(đ) </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{Utility.GetDecimalString(item.TotalValuationAmount)}</Text>
+                    </View>
+                </View>
+                <View style={styles.Item}>
+                    <View style={{ flex: 2, flexDirection: "row" }}>
+                        <Text style={{ fontWeight: "600" }}>TG còn lại của SLA </Text>
+                    </View>
+                    <View style={{ flex: 3 }}>
+                        <Text>{item.SLAPlanEnd}</Text>
+                    </View>
+                </View>
+            </TouchableOpacity>
+        );
+    }
+
+    renderItem1(index: number, item: ProcessValuationDocument) {
         return (
             <View
                 style={{
@@ -166,29 +243,10 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
 
                     </View>
                 </TouchableOpacity>
-                {/* <View style={{ justifyContent: 'center', alignItems: 'center', alignSelf: 'center' }}>
-                    <TouchableOpacity
-                        style={{ padding: 5 }}
-                        onPress={() => {
-                            this.setState({ PVDID: item.ProcessValuationDocumentID, showConfirmApprove: true })
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <FontAwesome5 name="check-circle" size={25} color={"#02c39a"} />
-                    </TouchableOpacity>
-                    <TouchableOpacity
-                        style={{ padding: 5 }}
-                        onPress={() => {
-                            this.setState({ PVDID: item.ProcessValuationDocumentID, showConfirmReject: true })
-                        }}
-                        activeOpacity={0.7}
-                    >
-                        <FontAwesome5 name="times-circle" size={25} color={"#e63946"} />
-                    </TouchableOpacity>
-                </View> */}
             </View>
         );
     }
+    
 
     render() {
         return (
@@ -212,7 +270,6 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
                                 this.props.navigation.navigate("HoSoFilter", {
                                     Screen: Enums.FeatureId.ApprovingValuation,
                                 });
-                                //this.props.navigation.navigate('KeHoachVisitNgayMap');
                             }}
                         >
                             <AntDesign name="search1" size={25} color="#FFFFFF" />
@@ -250,7 +307,6 @@ export default class DanhsachBCDGChoDuyetSrc extends React.Component<iProps, iSt
             </View>
         );
     }
-
 }
 
 const styles = StyleSheet.create({

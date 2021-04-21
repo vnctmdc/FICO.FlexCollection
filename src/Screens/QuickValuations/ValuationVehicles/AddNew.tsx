@@ -25,7 +25,7 @@ import HttpUtils from "../../../Utils/HttpUtils";
 import SMX from "../../../constants/SMX";
 import { inject, observer } from "mobx-react";
 import GlobalStore from "../../../Stores/GlobalStore";
-import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import AntDesign from "react-native-vector-icons/AntDesign";
 import GlobalCache from "../../../Caches/GlobalCache";
 import QuickValuationDto from "../../../DtoParams/QuickValuationDto";
 import DropDownBox from "../../../components/DropDownBox";
@@ -103,6 +103,26 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
             this.props.GlobalStore.Exception = ex;
         }
 
+    }
+
+    async refreshData() {
+        this.setState({
+            LstCarType: [],
+            LstBrand: [],
+            LstModel: [],
+            ProducedYear: '',
+            TotalPrice: '',
+            txtOTP: '',
+            QuickValuationVehicle: new QuickValuationVehicle(),
+            VerifyOTP: false,
+            ShowResult: false,
+            ShowCalculate: true,
+            SelectedBrand: null,
+            SelectedCarType: null,
+            SelectedModel: null
+
+        });
+        await this.SetUpForm();
     }
 
     async GetModelByBrand() {
@@ -218,7 +238,15 @@ export default class QuickValuationVehiclesScr extends Component<iProps, iState>
     render() {
         return (
             <View style={{ height: height, backgroundColor: "#FFF" }}>
-                <Toolbar Title="Tính giá nhanh PTGT Đường bộ" navigation={this.props.navigation} HasDrawer={true} />
+                <Toolbar Title="Tính giá nhanh PTGT Đường bộ" navigation={this.props.navigation} HasDrawer={true}>
+                    <View style={{ marginLeft: 15 }}>
+                        <TouchableOpacity activeOpacity={0.5} onPress={() => {
+                            this.refreshData();
+                        }}>
+                            <AntDesign name="reload1" size={23} color="#FFFFFF" />
+                        </TouchableOpacity>
+                    </View>
+                </Toolbar>
                 <KeyboardAvoidingView behavior="height" style={{ flex: 1, padding: 10 }}>
                     <ScrollView showsVerticalScrollIndicator={false}>
                         <View>

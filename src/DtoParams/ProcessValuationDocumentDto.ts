@@ -1,4 +1,6 @@
 import adm_Attachment from "../Entities/adm_Attachment";
+import Employee from "../Entities/Employee";
+import PreLiminaryQuote from "../Entities/PreLiminaryQuote";
 import ProcessValuationDocument from "../Entities/ProcessValuationDocument";
 import ReportGeneratorCommand from "../Entities/ReportGeneratorCommand";
 import SystemParameter from "../Entities/SystemParameter";
@@ -6,6 +8,9 @@ import { BaseParam } from "./BaseParam";
 
 export default class ProcessValuationDocumentDto extends BaseParam {
     
+    //public ProcessValuationDocumentID?: number;
+    public EmployeeID?: number;
+
     public ProcessValuationDocument?: ProcessValuationDocument;
 
     public LstPVDocument?: ProcessValuationDocument[];
@@ -20,21 +25,37 @@ export default class ProcessValuationDocumentDto extends BaseParam {
 
     public Attachment?: adm_Attachment;
 
-    ProvinceID?: number;
+    public ProvinceID?: number;
 
-    DistrictID?: number;
+    public DistrictID?: number;
 
-    TownID?: number;
+    public TownID?: number;
 
-    LstProvince: SystemParameter[];
+    public LstProvince: SystemParameter[];
 
-    LstDistrict: SystemParameter[];
+    public LstDistrict: SystemParameter[];
     
-    LstTown: SystemParameter[];
+    public LstTown: SystemParameter[];
 
     public Filter?: ProcessValuationDocumentFilter;
 
     public ReportGeneratorCommand?: ReportGeneratorCommand;
+
+    public PreLiminaryQuote?: PreLiminaryQuote;
+
+    public btnPreliminaryOK?: boolean;
+
+    public LstMortgageAsset1: SystemParameter[];
+
+    public LstMortgageAssetLevel: SystemParameter[];
+
+    public LstMortgageAssetRank: SystemParameter[];
+
+    public LstAbilityToTrade: SystemParameter[];
+
+    public LstEmployee?: Employee[];
+
+    public showApprovalAuthority?: boolean;
 
 }
 

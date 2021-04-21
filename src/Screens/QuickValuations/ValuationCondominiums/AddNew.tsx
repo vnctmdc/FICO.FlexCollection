@@ -27,6 +27,7 @@ import SMX from "../../../constants/SMX";
 import { inject, observer } from "mobx-react";
 import GlobalStore from "../../../Stores/GlobalStore";
 import FontAwesome5 from "react-native-vector-icons/FontAwesome5";
+import AntDesign from "react-native-vector-icons/AntDesign";
 import GlobalCache from "../../../Caches/GlobalCache";
 import QuickValuationDto from "../../../DtoParams/QuickValuationDto";
 import SystemParameter from "../../../Entities/SystemParameter";
@@ -54,11 +55,8 @@ interface iState {
     Area?: string;
     MarketUnitPrice?: string;
     PlusIsCornerYes: boolean;
-    PlusIsCornerNo: boolean;
     MinusNearGarbageRoomYes: boolean;
-    MinusNearGarbageRoomNo: boolean;
     MinusOtherYes?: boolean;
-    MinusOtherNo?: boolean;
     TotalPrice?: string;
     txtOTP?: string;
     QuickValuationCondominium?: QuickValuationCondominium;
@@ -80,11 +78,8 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
             Area: '',
             MarketUnitPrice: '',
             PlusIsCornerYes: false,
-            PlusIsCornerNo: true,
             MinusNearGarbageRoomYes: false,
-            MinusNearGarbageRoomNo: true,
             MinusOtherYes: false,
-            MinusOtherNo: true,
             TotalPrice: '',
             txtOTP: '',
             QuickValuationCondominium: new QuickValuationCondominium(),
@@ -113,6 +108,30 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
 
         this.props.GlobalStore.HideLoading();
 
+    }
+
+    async refreshData() {
+        this.setState({
+            LstProvince: [],
+            ProvinceID: null,
+            LstDistrict: [],
+            DistrictID: null,
+            LstBuilding: [],
+            BuildingID: null,
+            Area: '',
+            MarketUnitPrice: '',
+            PlusIsCornerYes: false,
+            MinusNearGarbageRoomYes: false,
+            MinusOtherYes: false,
+            TotalPrice: '',
+            txtOTP: '',
+            QuickValuationCondominium: new QuickValuationCondominium(),
+            VerifyOTP: false,
+            ShowResult: false,
+            ShowCalculate: true
+
+        });
+        await this.SetUpForm();
     }
 
     async GetDistrictByProvince() {
@@ -251,7 +270,15 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
     render() {
         return (
             <View style={{ height: height, backgroundColor: "#FFF" }}>
-                <Toolbar Title="Tính giá nhanh Chung cư" navigation={this.props.navigation} HasDrawer={true} />
+                <Toolbar Title="Tính giá nhanh Chung cư" navigation={this.props.navigation} HasDrawer={true}>
+                    <View style={{ marginLeft: 15 }}>
+                        <TouchableOpacity activeOpacity={0.5} onPress={() => {
+                            this.refreshData();
+                        }}>
+                            <AntDesign name="reload1" size={23} color="#FFFFFF" />
+                        </TouchableOpacity>
+                    </View>
+                </Toolbar>
                 <KeyboardAvoidingView behavior="height" style={{ flex: 1, padding: 10 }}>
                     <ScrollView showsVerticalScrollIndicator={false}>
                         <View>
@@ -359,117 +386,89 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
                                     II. CÁC YẾU TỐ THUẬN LỢI
                                 </Text>
                             </View>
-                            <View style={styles.ItemNote}>
-                                <View style={{ flex: 2, flexDirection: 'row' }}>
+                            <View style={styles.Item}>
+                                <View style={{ flex: 3, flexDirection: 'row' }}>
                                     <Text>Căn góc </Text>
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
-                            </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
-                                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                <View style={{ flex: 2, flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.PlusIsCornerYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ PlusIsCornerNo: false });
-                                            else this.setState({ PlusIsCornerNo: true });
                                             this.setState({ PlusIsCornerYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.PlusIsCornerNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ PlusIsCornerYes: false });
-                                            else this.setState({ PlusIsCornerYes: true });
-                                            this.setState({ PlusIsCornerNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.PlusIsCornerYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
-
+                            <View
+                                style={{
+                                    height: 1,
+                                    backgroundColor: "#F0F0F4",
+                                    marginVertical: 8,
+                                }}
+                            />
                             <View style={[styles.Item, { marginTop: 20, marginBottom: 10 }]}>
                                 <Text style={{ fontWeight: '600', fontSize: 18 }}>
                                     III. CÁC YẾU TỐ KHÔNG THUẬN LỢI
                                 </Text>
                             </View>
-                            <View style={styles.ItemNote}>
-                                <View style={{ flex: 2, flexDirection: 'row' }}>
+                            <View style={styles.Item}>
+                                <View style={{ flex: 3, flexDirection: 'row' }}>
                                     <Text>Gần nhà thu rác </Text>
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
-                            </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
-                                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                <View style={{ flex: 2, flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.MinusNearGarbageRoomYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusNearGarbageRoomNo: false });
-                                            else this.setState({ MinusNearGarbageRoomNo: true });
                                             this.setState({ MinusNearGarbageRoomYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.MinusNearGarbageRoomNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusNearGarbageRoomYes: false });
-                                            else this.setState({ MinusNearGarbageRoomYes: true });
-                                            this.setState({ MinusNearGarbageRoomNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.MinusNearGarbageRoomYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
-                            <View style={styles.ItemNote}>
-                                <View style={{ flex: 2, flexDirection: 'row' }}>
+                            <View
+                                style={{
+                                    height: 1,
+                                    backgroundColor: "#F0F0F4",
+                                    marginVertical: 8,
+                                }}
+                            />
+                            <View style={styles.Item}>
+                                <View style={{ flex: 3, flexDirection: 'row' }}>
                                     <Text>Các yếu tố bất lợi khác nếu có </Text>
                                     <Text style={{ color: 'red' }}>*</Text>
                                 </View>
-                            </View>
-                            <View style={{ paddingLeft: width / 3, flexDirection: "row", alignItems: "center", padding: 10 }}>
-                                <View style={{ flexDirection: "row", alignItems: "center" }}>
+                                <View style={{ flex: 2, flexDirection: "row", alignItems: "center" }}>
                                     <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
+                                        // trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
+                                        // thumbColor={"#FFFFFF"}
                                         value={this.state.MinusOtherYes}
                                         onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusOtherNo: false });
-                                            else this.setState({ MinusOtherNo: true });
                                             this.setState({ MinusOtherYes: val });
                                         }}
                                     />
-                                    <Text style={{ marginLeft: 3 }}>Có</Text>
-                                </View>
-
-                                <View style={{ flexDirection: "row", alignItems: "center", marginLeft: 30 }}>
-                                    <Switch
-                                        trackColor={{ true: "#FF9800", false: "#E0E4E9" }}
-                                        thumbColor={"#FFFFFF"}
-                                        value={this.state.MinusOtherNo}
-                                        onValueChange={(val) => {
-                                            if (val == true) this.setState({ MinusOtherYes: false });
-                                            else this.setState({ MinusOtherYes: true });
-                                            this.setState({ MinusOtherNo: val });
-                                        }}
-                                    />
-                                    <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    {
+                                        this.state.MinusOtherYes ? <Text style={{ marginLeft: 3 }}>Có</Text> : <Text style={{ marginLeft: 3 }}>Không</Text>
+                                    }
                                 </View>
                             </View>
+                            <View
+                                style={{
+                                    height: 1,
+                                    backgroundColor: "#F0F0F4",
+                                    marginVertical: 8,
+                                }}
+                            />
                             {
                                 this.state.ShowResult == true ? (
                                     <View>
@@ -486,7 +485,7 @@ export default class QuickValuationCondominiumsScr extends Component<iProps, iSt
                                                 <Text
                                                     style={{ color: "#1B2031", marginHorizontal: 7, marginVertical: 10 }}
                                                 >
-                                                    {this.state.QuickValuationCondominium.TotalPrice? Utility.GetDecimalString(this.state.QuickValuationCondominium.TotalPrice) : ""}
+                                                    {this.state.QuickValuationCondominium.TotalPrice ? Utility.GetDecimalString(this.state.QuickValuationCondominium.TotalPrice) : ""}
                                                 </Text>
                                             </View>
                                         </View>
